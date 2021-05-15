@@ -10,7 +10,7 @@
       integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x"
       crossorigin="anonymous"
     />
-    <title>Servers list</title>
+    <title>#(title)</title>
   </head>
 
   <body data-spy="scroll" data-target="main-nav" id="home">
@@ -59,30 +59,16 @@
           </tr>
         </thead>
         <tbody>
+          #for(serie in series):
           <tr>
-            <td>Porsche iRacing Cup</td>
-            <td>34 minutes</td>
-            <td>11 May</td>
-            <td>16 laps</td>
-            <td>Hockenheimring Baden-Württemberg - Grand Prix</td>
+            <td>#(serie.name)</td>
+            <td>#(serie.nextRace)</td>
+            <td>#(serie.startDate)</td>
+            <td>#(serie.length)</td>
+            <td>#(serie.track)</td>
             <td class="d-none d-sm-table-cell">Results</td>
           </tr>
-          <tr>
-            <td>VRS GT Sprint Series</td>
-            <td>55 minutes</td>
-            <td>11 May</td>
-            <td>40 mins</td>
-            <td>Okayama International Circuit - Full Course</td>
-            <td class="d-none d-sm-table-cell">Results</td>
-          </tr>
-          <tr>
-            <td>IMSA Michelin Pilot Challenge</td>
-            <td>12 minutes</td>
-            <td>11 May</td>
-            <td>45 mins</td>
-            <td>Silverstone Circuit - Grand Prix</td>
-            <td class="d-none d-sm-table-cell">Results</td>
-          </tr>
+          #endfor
         </tbody>
       </table>
     </div>
