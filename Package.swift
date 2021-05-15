@@ -13,10 +13,10 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "App",
+            name: "Frontend",
             dependencies: [
                 .product(name: "Vapor", package: "vapor"),
-                .product(name: "Leaf", package: "leaf")
+                .product(name: "Leaf", package: "leaf"),
             ],
             swiftSettings: [
                 // Enable better optimizations when building in Release configuration. Despite the use of
@@ -25,10 +25,10 @@ let package = Package(
                 .unsafeFlags(["-cross-module-optimization"], .when(configuration: .release))
             ]
         ),
-        .target(name: "Run", dependencies: [.target(name: "App")]),
-        .testTarget(name: "AppTests", dependencies: [
-            .target(name: "App"),
-            .product(name: "XCTVapor", package: "vapor"),
-        ])
+        // .target(name: "Run", dependencies: [.target(name: "App")]),
+        // .testTarget(name: "AppTests", dependencies: [
+        //     .target(name: "App"),
+        //     .product(name: "XCTVapor", package: "vapor"),
+        // ])
     ]
 )
