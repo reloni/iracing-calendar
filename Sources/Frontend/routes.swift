@@ -17,7 +17,6 @@ struct Serie: Codable {
 
 protocol ViewContext: Content {
     var title: String { get }
-    var series: [Serie] { get }
     var navbarItems: [NavbarItem] { get }
 }
 
@@ -27,14 +26,14 @@ struct SeriesViewContext: ViewContext {
     let navbarItems: [NavbarItem]
 }
 
-func routes(_ app: Application) throws {
-    app.get { req in 
-        return "Home"
-    }
+struct HomeViewContext: ViewContext {
+    let title: String
+    let navbarItems: [NavbarItem]
+}
 
-    app.get("home") { req in 
-        return "Home"
-    }
+func routes(_ app: Application) throws {
+    app.get(use: homeView)
+    app.get("home", use: homeView)
     
     app.get("favorite-series") { req -> EventLoopFuture<View> in
         let context = SeriesViewContext(
@@ -64,10 +63,22 @@ func routes(_ app: Application) throws {
             ],
             navbarItems: [
                 .init(title: "Favorites", link: "favorite-series", isActive: false),
-                .init(title: "All series", link: "home", isActive: true),
+                .init(title: "All series", link: "all-series", isActive: true),
                 .init(title: "Profile", link: "home", isActive: false),
             ]
             )
         return req.view.render("table-view", context)
+    }
+
+    func homeView(req: Request) throws -> EventLoopFuture<View> {
+        let context = HomeViewContext(
+            title: "All series",
+            navbarItems: [
+                .init(title: "Favorites", link: "favorite-series", isActive: false),
+                .init(title: "All series", link: "all-series", isActive: false),
+                .init(title: "Profile", link: "home", isActive: false),
+            ]
+            )
+        return req.view.render("home", context)
     }
 }
