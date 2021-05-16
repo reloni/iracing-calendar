@@ -24,9 +24,9 @@ func routes(_ app: Application) throws {
         return "It works!"
     }
     
-    app.get("series") { req -> EventLoopFuture<View> in
+    app.get("favorite-series") { req -> EventLoopFuture<View> in
         let context = SeriesViewContext(
-            title: "Current series",
+            title: "Favorite series",
             series: [
                 .init(name: "Porsche iRacing Cup", nextRace: "2 minutes", startDate: "11 May", length: "16 laps", track: "Hockenheimring Baden-Württemberg - Grand Prix"),
                 .init(name: "VRS GT Sprint Series", nextRace: "12 minutes", startDate: "11 May", length: "40 mins", track: "Okayama International Circuit - Full Course"),
@@ -35,6 +35,6 @@ func routes(_ app: Application) throws {
                 .init(name: "Pure Driving School European Sprint Series", nextRace: "15 minutes", startDate: "11 May", length: "60 mins", track: "Silverstone Circuit - Grand Prix")
             ]
             )
-        return req.view.render("series-table", context)
+        return req.view.render("favorite-series", context)
     }
 }
