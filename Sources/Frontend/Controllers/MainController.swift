@@ -27,11 +27,11 @@ struct MainController: RouteCollection {
         let context = SeriesViewContext(
             title: "All series",
             series: [
-                .init(name: "Porsche iRacing Cup", nextRace: "2 minutes", startDate: "11 May", length: "16 laps", track: "Hockenheimring Baden-Württemberg - Grand Prix"),
-                .init(name: "VRS GT Sprint Series", nextRace: "12 minutes", startDate: "11 May", length: "40 mins", track: "Okayama International Circuit - Full Course"),
-                .init(name: "IMSA Michelin Pilot Challenge", nextRace: "67 minutes", startDate: "11 May", length: "30 mins", track: "Mid-Ohio Sports Car Course - Full Course"),
-                .init(name: "IMSA Hagerty iRacing Series", nextRace: "112 minutes", startDate: "11 May", length: "45 mins", track: "Mid-Ohio Sports Car Course - Full Course"),
-                .init(name: "Pure Driving School European Sprint Series", nextRace: "15 minutes", startDate: "11 May", length: "60 mins", track: "Silverstone Circuit - Grand Prix")
+                .init(name: "Porsche iRacing Cup", nextRace: "2 minutes", startDate: "11 May", length: "16 laps", track: "Hockenheimring Baden-Württemberg - Grand Prix", isFavorite: false),
+                .init(name: "VRS GT Sprint Series", nextRace: "12 minutes", startDate: "11 May", length: "40 mins", track: "Okayama International Circuit - Full Course", isFavorite: true),
+                .init(name: "IMSA Michelin Pilot Challenge", nextRace: "67 minutes", startDate: "11 May", length: "30 mins", track: "Mid-Ohio Sports Car Course - Full Course", isFavorite: true),
+                .init(name: "IMSA Hagerty iRacing Series", nextRace: "112 minutes", startDate: "11 May", length: "45 mins", track: "Mid-Ohio Sports Car Course - Full Course", isFavorite: false),
+                .init(name: "Pure Driving School European Sprint Series", nextRace: "15 minutes", startDate: "11 May", length: "60 mins", track: "Silverstone Circuit - Grand Prix", isFavorite: true)
             ],
             navbarItems: [
                 .init(title: "Favorites", link: "favorite-series", isActive: false),
@@ -39,15 +39,15 @@ struct MainController: RouteCollection {
                 .init(title: "Profile", link: "home", isActive: false),
             ]
             )
-        return req.view.render("table-view", context)
+        return req.view.render("all-series-view", context)
     }
 
     func favoriteSeriesView(req: Request) throws -> EventLoopFuture<View> {
         let context = SeriesViewContext(
             title: "Favorite series",
             series: [
-                .init(name: "Porsche iRacing Cup", nextRace: "2 minutes", startDate: "11 May", length: "16 laps", track: "Hockenheimring Baden-Württemberg - Grand Prix"),
-                .init(name: "VRS GT Sprint Series", nextRace: "12 minutes", startDate: "11 May", length: "40 mins", track: "Okayama International Circuit - Full Course")
+                .init(name: "Porsche iRacing Cup", nextRace: "2 minutes", startDate: "11 May", length: "16 laps", track: "Hockenheimring Baden-Württemberg - Grand Prix", isFavorite: true),
+                .init(name: "VRS GT Sprint Series", nextRace: "12 minutes", startDate: "11 May", length: "40 mins", track: "Okayama International Circuit - Full Course", isFavorite: true)
             ],
             navbarItems: [
                 .init(title: "Favorites", link: "favorite-series", isActive: true),
@@ -55,6 +55,6 @@ struct MainController: RouteCollection {
                 .init(title: "Profile", link: "home", isActive: false),
             ]
             )
-        return req.view.render("table-view", context)
+        return req.view.render("favorite-series-view", context)
     }
 }
