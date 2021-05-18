@@ -1,4 +1,4 @@
-#extend("navbar"):
+#extend("navbar"): 
 #export("body"):
 <!-- List -->
 <div class="container mt-4">
@@ -17,11 +17,14 @@
       #for(serie in series):
       <tr>
         <td>
-          #if(serie.isFavorite): 
-          <input class="form-check-input" type="checkbox" value="" id="isFavoriteCheckbox" checked>  
-          #else:
-          <input class="form-check-input" type="checkbox" value="" id="isFavoriteCheckbox">
-          #endif
+          <input
+            class="form-check-input"
+            type="checkbox"
+            value=""
+            id="isFavoriteCheckbox"
+            onclick="toggleFavorite(event);"
+            #if(serie.isFavorite): checked #endif
+          />
         </td>
         <td>#(serie.name)</td>
         <td>#(serie.nextRace)</td>
@@ -33,5 +36,27 @@
     </tbody>
   </table>
 </div>
-#endexport
+<script>
+  function toggleFavorite(e)
+  {
+    
+    if(e.target.checked)
+    {
+      ///do post request with 1 in parameter
+      console.log("do post request with 1 in parameter");
+      var xhr = new XMLHttpRequest();
+      xhr.open("POST", 'http://localhost:9000/setFavoriteStatus?index=0&isFavorite=true', true);
+      xhr.send();
+    }
+    else
+    {
+      ///do post request with 0 parameter
+      console.log("do post request with 0 parameter");
+      var xhr = new XMLHttpRequest();
+      xhr.open("POST", 'http://localhost:9000/setFavoriteStatus?index=0&isFavorite=false', true);
+      xhr.send();
+    }
+  }
+</script>
+#endexport 
 #endextend
