@@ -12,5 +12,5 @@ struct Serie: Codable {
     let startDate: String
     let length: String
     let track: String
-    let isFavorite: Bool
+    var isFavorite: Bool
 }
