@@ -7,6 +7,7 @@ struct NavbarItem: Codable {
 }
 
 struct Serie: Codable {
+    let uuid: UUID
     let name: String
     let nextRace: String
     let startDate: String

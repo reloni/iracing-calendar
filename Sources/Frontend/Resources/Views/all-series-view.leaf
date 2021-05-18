@@ -21,7 +21,7 @@
             class="form-check-input"
             type="checkbox"
             value=""
-            id="isFavoriteCheckbox"
+            serieUuid="#(serie.uuid)"
             onclick="toggleFavorite(event);"
             #if(serie.isFavorite): checked #endif
           />
@@ -39,21 +39,16 @@
 <script>
   function toggleFavorite(e)
   {
-    
     if(e.target.checked)
     {
-      ///do post request with 1 in parameter
-      console.log("do post request with 1 in parameter");
       var xhr = new XMLHttpRequest();
-      xhr.open("POST", 'http://localhost:9000/setFavoriteStatus?index=0&isFavorite=true', true);
+      xhr.open("POST", `http://127.0.0.1:9000/setFavoriteStatus?uuid=${e.target.getAttribute('serieUuid')}&isFavorite=true`, true);
       xhr.send();
     }
     else
     {
-      ///do post request with 0 parameter
-      console.log("do post request with 0 parameter");
       var xhr = new XMLHttpRequest();
-      xhr.open("POST", 'http://localhost:9000/setFavoriteStatus?index=0&isFavorite=false', true);
+      xhr.open("POST", `http://127.0.0.1:9000/setFavoriteStatus?uuid=${e.target.getAttribute('serieUuid')}&isFavorite=false`, true);
       xhr.send();
     }
   }
