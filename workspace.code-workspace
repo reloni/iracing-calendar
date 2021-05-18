@@ -4,5 +4,11 @@
 			"path": "."
 		}
 	],
-	"settings": {}
+	"settings": {
+		"terminal.integrated.env.osx": {
+			// "TOOLCHAINS": "org.swift.50202011131a",
+			// "SOURCEKIT_TOOLCHAIN_PATH": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain"
+			"DEVELOPER_DIR": "/Applications/Xcode.app/Contents/Developer"
+		}
+	}
 }
