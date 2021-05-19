@@ -1,5 +1,6 @@
 import Vapor
 import Leaf
+import ImperialGoogle
 
 var allSeries: [Serie] = [
     .init(uuid: UUID(), name: "Porsche iRacing Cup", nextRace: "2 minutes", startDate: "11 May", length: "16 laps", track: "Hockenheimring Baden-Württemberg - Grand Prix", isFavorite: false),
@@ -18,6 +19,18 @@ struct MainController: RouteCollection {
         routes.get("favorite-series", use: favoriteSeriesView)
         routes.get("user-profile", use: homeView)
         routes.post("setFavoriteStatus", use: setFavoriteStatus)
+
+        try routes.oAuth(
+            from: Google.self,
+            authenticate: "login-google",
+            callback: "http://localhost.charlesproxy.com:9000/oauth/google",
+            scope: ["profile", "email"],
+            completion: processGoogleLogin)
+    }
+
+    func processGoogleLogin(request: Request, token: String) throws -> EventLoopFuture<ResponseEncodable> {
+        print(try request.accessToken())
+        return request.eventLoop.future(request.redirect(to: "/"))
     }
 
     func homeView(req: Request) throws -> EventLoopFuture<View> {

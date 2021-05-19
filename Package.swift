@@ -9,7 +9,8 @@ let package = Package(
     dependencies: [
         // 💧 A server-side Swift web framework.
         .package(url: "https://github.com/vapor/vapor.git", .exact("4.45.2")),
-        .package(url: "https://github.com/vapor/leaf", from: "4.1.2")
+        .package(url: "https://github.com/vapor/leaf", .exact("4.1.2")),
+        .package(url: "https://github.com/vapor-community/Imperial.git", .exact("1.1.0"))
     ],
     targets: [
         .target(
@@ -17,6 +18,7 @@ let package = Package(
             dependencies: [
                 .product(name: "Vapor", package: "vapor"),
                 .product(name: "Leaf", package: "leaf"),
+                .product(name: "ImperialGoogle", package: "Imperial")
             ],
             swiftSettings: [
                 // Enable better optimizations when building in Release configuration. Despite the use of
