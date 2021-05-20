@@ -10,7 +10,6 @@ var allSeries: [Serie] = [
 ]
 
 struct MainController: RouteCollection {
-
     func boot(routes: RoutesBuilder) throws {
         routes.get(use: homeView)
         routes.get("home", use: homeView)
@@ -66,7 +65,7 @@ struct MainController: RouteCollection {
         if let index = allSeries.firstIndex(where: { $0.uuid == uuid }) {
             allSeries[index].isFavorite = isFavorite
         }
-        // allSeries[index].isFavorite = isFavorite
+
         return req.eventLoop.makeSucceededFuture(.init(status: .ok))
     }
 }
