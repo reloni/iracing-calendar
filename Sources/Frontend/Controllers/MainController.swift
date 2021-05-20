@@ -1,6 +1,5 @@
 import Vapor
 import Leaf
-import ImperialGoogle
 
 var allSeries: [Serie] = [
     .init(uuid: UUID(), name: "Porsche iRacing Cup", nextRace: "2 minutes", startDate: "11 May", length: "16 laps", track: "Hockenheimring Baden-Württemberg - Grand Prix", isFavorite: false),
@@ -18,15 +17,7 @@ struct MainController: RouteCollection {
         routes.get("all-series", use: allSeriesView)
         routes.get("favorite-series", use: favoriteSeriesView)
         routes.get("user-profile", use: homeView)
-        
         routes.post("setFavoriteStatus", use: setFavoriteStatus)
-
-        // try routes.oAuth(
-        //     from: Google.self,
-        //     authenticate: "login-google",
-        //     callback: "http://localhost.charlesproxy.com:9000/oauth/google",
-        //     scope: ["profile", "email"],
-        //     completion: processGoogleLogin)
 
         routes.get("login", "google", use: loginWithGoogle)
         routes.get("oauth", "google", use: handleGoogleOauth)
@@ -53,7 +44,6 @@ struct MainController: RouteCollection {
         return request.eventLoop.future(request.redirect(to: components.url!.absoluteString))
     }
 
-    // new
     func handleGoogleOauth(request: Request) throws -> EventLoopFuture<Response> {
         let code = try request.query.get(String.self, at: "code")
         
@@ -72,12 +62,6 @@ struct MainController: RouteCollection {
             print(token)
             return request.redirect(to: "/")
         }
-    }
-
-    // old Imperial
-    func processGoogleLogin(request: Request, token: String) throws -> EventLoopFuture<ResponseEncodable> {
-        print(try request.accessToken())        
-        return request.eventLoop.future(request.redirect(to: "/"))
     }
 
     func homeView(req: Request) throws -> EventLoopFuture<View> {
@@ -126,7 +110,7 @@ struct MainController: RouteCollection {
         if let index = allSeries.firstIndex(where: { $0.uuid == uuid }) {
             allSeries[index].isFavorite = isFavorite
         }
-        
+
         return req.eventLoop.makeSucceededFuture(.init(status: .ok))
     }
 }
