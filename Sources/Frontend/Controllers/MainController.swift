@@ -38,7 +38,7 @@ struct MainController: RouteCollection {
             URLQueryItem(name: "response_type", value: "code"),
             URLQueryItem(name: "redirect_uri", value: callbackUrl),
             URLQueryItem(name: "client_id", value: clientId),
-            URLQueryItem(name: "prompt", value: "select_account")
+            URLQueryItem(name: "prompt", value: "consent")
         ]
 
         return request.eventLoop.future(request.redirect(to: components.url!.absoluteString))
@@ -57,7 +57,7 @@ struct MainController: RouteCollection {
                 "grant_type": "authorization_code"
                 ], as: .urlEncodedForm)
         }.flatMapThrowing { res in
-            try res.content.decode(GoogleTokenResponse.self)
+            try res.content.decode(GoogleTokenData.self)
         }.flatMapThrowing { token in 
             print(token)
             return request.redirect(to: "/")
