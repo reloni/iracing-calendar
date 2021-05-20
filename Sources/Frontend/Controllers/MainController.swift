@@ -18,18 +18,50 @@ struct MainController: RouteCollection {
         routes.get("all-series", use: allSeriesView)
         routes.get("favorite-series", use: favoriteSeriesView)
         routes.get("user-profile", use: homeView)
+        
         routes.post("setFavoriteStatus", use: setFavoriteStatus)
 
-        try routes.oAuth(
-            from: Google.self,
-            authenticate: "login-google",
-            callback: "http://localhost.charlesproxy.com:9000/oauth/google",
-            scope: ["profile", "email"],
-            completion: processGoogleLogin)
+        // try routes.oAuth(
+        //     from: Google.self,
+        //     authenticate: "login-google",
+        //     callback: "http://localhost.charlesproxy.com:9000/oauth/google",
+        //     scope: ["profile", "email"],
+        //     completion: processGoogleLogin)
+
+        routes.get("login", "google", use: loginWithGoogle)
+        routes.get("oauth", "google", use: handleGoogleOauth)
     }
 
+    func loginWithGoogle(request: Request) throws -> EventLoopFuture<Response> {
+        let callbackUrl = Environment.get("GOOGLE_CALLBACK_URL")!
+        let clientId = Environment.get("GOOGLE_CLIENT_ID")!
+
+        var components = URLComponents()
+        components.scheme = "https"
+        components.host = "accounts.google.com"
+        components.path = "/o/oauth2/v2/auth"
+        components.queryItems = [
+            URLQueryItem(name: "scope", value: "profile email"),
+            URLQueryItem(name: "access_type", value: "offline"),
+            URLQueryItem(name: "include_granted_scopes", value: "true"),
+            URLQueryItem(name: "response_type", value: "code"),
+            URLQueryItem(name: "redirect_uri", value: callbackUrl),
+            URLQueryItem(name: "client_id", value: clientId),
+            URLQueryItem(name: "prompt", value: "select_account")
+        ]
+
+        return request.eventLoop.future(request.redirect(to: components.url!.absoluteString))
+    }
+
+    // new
+    func handleGoogleOauth(request: Request) throws -> EventLoopFuture<Response> {
+        print(try request.query.get(String.self, at: "code"))
+        return request.eventLoop.future(request.redirect(to: "/"))
+    }
+
+    // old Imperial
     func processGoogleLogin(request: Request, token: String) throws -> EventLoopFuture<ResponseEncodable> {
-        print(try request.accessToken())
+        print(try request.accessToken())        
         return request.eventLoop.future(request.redirect(to: "/"))
     }
 
