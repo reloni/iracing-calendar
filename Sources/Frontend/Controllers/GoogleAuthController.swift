@@ -43,7 +43,14 @@ struct GoogleAuthController: RouteCollection {
             try res.content.decode(GoogleTokenData.self)
         }.flatMapThrowing { token in 
             print(token)
-            return request.redirect(to: "/")
+            let response = request.redirect(to: "/")
+            response.cookies["token"] = HTTPCookies.Value.init(
+                string: token.access_token, 
+                maxAge: 60,
+                isSecure: false, 
+                isHTTPOnly: true, 
+                sameSite: .lax)
+            return response
         }
     }
 }
