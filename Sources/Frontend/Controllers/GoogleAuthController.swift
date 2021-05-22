@@ -41,16 +41,37 @@ struct GoogleAuthController: RouteCollection {
                 ], as: .urlEncodedForm)
         }.flatMapThrowing { res in
             try res.content.decode(GoogleTokenData.self)
-        }.flatMapThrowing { token in 
+        }.flatMap { token in
+            GoogleAuthController.loadUserInfo(on: request, with: token)
+        }.flatMap { user, token in 
             print(token)
+            print(user)
+            
             let response = request.redirect(to: "/")
-            response.cookies["token"] = HTTPCookies.Value.init(
-                string: token.access_token, 
-                maxAge: 60,
-                isSecure: false, 
-                isHTTPOnly: true, 
-                sameSite: .lax)
-            return response
+            response.cookies["token"] = 
+                HTTPCookies.Value(
+                    string: token.access_token, 
+                    maxAge: 60,
+                    isSecure: false, 
+                    isHTTPOnly: true, 
+                    sameSite: .lax
+                )
+            return request.eventLoop.future(response)
         }
+    }
+
+    static func loadUserInfo(on request: Request, with token: GoogleTokenData) -> EventLoopFuture<(GoogleUser, GoogleTokenData)> {
+        var headers = HTTPHeaders()
+        headers.bearerAuthorization = BearerAuthorization(token: token.access_token)
+        let googleApiUrl: URI = "https://www.googleapis.com/oauth2/v1/userinfo?alt=json"
+        return request.client
+            .get(googleApiUrl, headers: headers)
+            .flatMapThrowing { res in
+                if res.status == .ok {
+                    return (try res.content.decode(GoogleUser.self), token)
+                } else {
+                    throw Abort(.internalServerError)
+                }
+            }
     }
 }
