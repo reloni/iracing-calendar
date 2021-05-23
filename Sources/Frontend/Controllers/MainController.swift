@@ -20,6 +20,7 @@ struct MainController: RouteCollection {
     }
 
     func homeView(req: Request) throws -> EventLoopFuture<View> {
+        print(req.session.user)
         let context = HomeViewContext(
             title: "All series",
             navbarItems: [
