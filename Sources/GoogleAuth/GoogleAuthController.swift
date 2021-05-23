@@ -1,8 +1,10 @@
 import Vapor
 import Core
 
-struct GoogleAuthController: RouteCollection {
-    func boot(routes: RoutesBuilder) throws {
+public struct GoogleAuthController: RouteCollection {
+    public init() { }
+    
+    public func boot(routes: RoutesBuilder) throws {
         routes.get("login", "google", use: loginWithGoogle)
         routes.get("oauth", "google", use: handleGoogleOauth)
     }
