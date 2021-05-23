@@ -19,6 +19,9 @@
         </li>
         #endfor
       </ul>
+      <div class="ms-auto">
+        <a type="button" class="btn btn-primary" href="/home">Log In</a>
+      </div>
     </div>
   </div>
 </nav>
