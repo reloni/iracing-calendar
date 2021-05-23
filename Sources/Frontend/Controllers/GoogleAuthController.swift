@@ -44,7 +44,12 @@ struct GoogleAuthController: RouteCollection {
         }.flatMap { token in
             GoogleAuthController.loadUserInfo(on: request, with: token)
         }.flatMap { user, token in 
-            request.session.user = SessionUser(uuid: UUID(), name: user.name ?? "", email: user.email, token: token)
+            request.session.user = 
+                SessionUser(uuid: UUID(), 
+                            name: user.name ?? "", 
+                            email: user.email, 
+                            profileImage: user.picture?.absoluteString,
+                            token: token)
             
             let response = request.redirect(to: "/")
             response.cookies["token"] = 

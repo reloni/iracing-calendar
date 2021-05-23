@@ -19,7 +19,7 @@
         </li>
         #endfor
       </ul>
-      <div class="ms-auto">
+      <div class="ms-auto d-flex">
         #if(user == nil):
         <a class="btn btn-primary" href="/login/google">Log In with Google</a>
         #else:
@@ -28,6 +28,7 @@
             <a href="/profile" class="nav-link">#(user.name)</a>
           </li>
         </ul>
+        <img src="#(user.profileImage)" class="rounded-circle" style="height:auto;width:40px;">
         #endif
       </div>
     </div>
