@@ -20,9 +20,9 @@ struct MainController: RouteCollection {
     }
 
     func homeView(req: Request) throws -> EventLoopFuture<View> {
-        print(req.session.user)
         let context = HomeViewContext(
             title: "All series",
+            user: req.session.user,
             navbarItems: [
                 .init(title: "Favorites", link: "favorite-series", isActive: false),
                 .init(title: "All series", link: "all-series", isActive: false),
@@ -35,6 +35,7 @@ struct MainController: RouteCollection {
     func allSeriesView(req: Request) throws -> EventLoopFuture<View> {
         let context = SeriesViewContext(
             title: "All series",
+            user: req.session.user,
             series: allSeries,
             navbarItems: [
                 .init(title: "Favorites", link: "favorite-series", isActive: false),
@@ -48,6 +49,7 @@ struct MainController: RouteCollection {
     func favoriteSeriesView(req: Request) throws -> EventLoopFuture<View> {
         let context = SeriesViewContext(
             title: "Favorite series",
+            user: req.session.user,
             series: allSeries.filter { $0.isFavorite },
             navbarItems: [
                 .init(title: "Favorites", link: "favorite-series", isActive: true),

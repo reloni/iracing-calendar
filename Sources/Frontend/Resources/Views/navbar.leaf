@@ -20,7 +20,15 @@
         #endfor
       </ul>
       <div class="ms-auto">
-        <a type="button" class="btn btn-primary" href="/home">Log In</a>
+        #if(user == nil):
+        <a class="btn btn-primary" href="/login/google">Log In with Google</a>
+        #else:
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a href="/profile" class="nav-link">#(user.name)</a>
+          </li>
+        </ul>
+        #endif
       </div>
     </div>
   </div>
