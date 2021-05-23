@@ -1,5 +1,6 @@
 import Vapor
 import Leaf
+import Core
 
 extension MainController {
     struct SeriesViewContext: ViewContext {

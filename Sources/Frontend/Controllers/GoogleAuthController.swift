@@ -1,4 +1,5 @@
 import Vapor
+import Core
 
 struct GoogleAuthController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {

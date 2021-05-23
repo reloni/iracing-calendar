@@ -1,5 +1,6 @@
 import Vapor
 import Leaf
+import Core
 
 var allSeries: [Serie] = [
     .init(uuid: UUID(), name: "Porsche iRacing Cup", nextRace: "2 minutes", startDate: "11 May", length: "16 laps", track: "Hockenheimring Baden-Württemberg - Grand Prix", isFavorite: false),

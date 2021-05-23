@@ -1,6 +1,6 @@
 import Vapor
 
-extension Session {
+public extension Session {
     var user: SessionUser? {
         get {
             decode(SessionUser.self, key: "user")
@@ -11,7 +11,7 @@ extension Session {
     }
 }
 
-extension Session {
+public extension Session {
     func encode<T: Encodable>(key: String, value: T) {
         self.data[key] = (try? JSONEncoder().encode(value))
                             .map { String(data: $0, encoding: .utf8) } ?? nil
