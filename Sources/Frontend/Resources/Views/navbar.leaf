@@ -21,7 +21,7 @@
       </ul>
       <div class="ms-auto d-flex">
         #if(user == nil):
-        <a class="btn btn-primary" href="/login/google">Log In with Google</a>
+        <a class="btn btn-primary" href="/oauth/login/google">Log In with Google</a>
         #else:
         <ul class="navbar-nav">
           <li class="nav-item">
