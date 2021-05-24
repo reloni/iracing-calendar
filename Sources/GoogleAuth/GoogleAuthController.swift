@@ -5,13 +5,13 @@ public struct GoogleAuthController: RouteCollection {
     public init() { }
     
     public func boot(routes: RoutesBuilder) throws {
-        routes.get("login", "google", use: loginWithGoogle)
-        routes.get("oauth", "google", use: handleGoogleOauth)
+        routes.get("oauth", "login", "google", use: loginWithGoogle)
+        routes.get("oauth", "callback", "google", use: handleGoogleOauth)
     }
 
     func loginWithGoogle(request: Request) throws -> EventLoopFuture<Response> {
-        let callbackUrl = Environment.get("GOOGLE_CALLBACK_URL")!
-        let clientId = Environment.get("GOOGLE_CLIENT_ID")!
+        let callbackUrl = Environment.EnvVar.callbackUrl.value!
+        let clientId = Environment.EnvVar.clientId.value!
 
         var components = URLComponents()
         components.scheme = "https"
@@ -33,13 +33,13 @@ public struct GoogleAuthController: RouteCollection {
     func handleGoogleOauth(request: Request) throws -> EventLoopFuture<Response> {
         let code = try request.query.get(String.self, at: "code")
         
-        return request.client.post("https://oauth2.googleapis.com/token", 
+        return request.client.post(URI(string: Environment.EnvVar.tokenExchangeUrl.value!), 
             headers: ["Content-Type": "application/x-www-form-urlencoded"]) { req in 
             try req.content.encode([
                 "code": code,
-                "client_id": Environment.get("GOOGLE_CLIENT_ID")!,
-                "client_secret": Environment.get("GOOGLE_CLIENT_SECRET")!,
-                "redirect_uri": Environment.get("GOOGLE_CALLBACK_URL")!,
+                "client_id": Environment.EnvVar.clientId.value!,
+                "client_secret": Environment.EnvVar.clientSecret.value!,
+                "redirect_uri": Environment.EnvVar.callbackUrl.value!,
                 "grant_type": "authorization_code"
                 ], as: .urlEncodedForm)
         }.flatMapThrowing { res in
@@ -70,9 +70,8 @@ public struct GoogleAuthController: RouteCollection {
     static func loadUserInfo(on request: Request, with token: GoogleTokenData) -> EventLoopFuture<(GoogleUser, GoogleTokenData)> {
         var headers = HTTPHeaders()
         headers.bearerAuthorization = BearerAuthorization(token: token.access_token)
-        let googleApiUrl: URI = "https://www.googleapis.com/oauth2/v1/userinfo?alt=json"
         return request.client
-            .get(googleApiUrl, headers: headers)
+            .get("https://www.googleapis.com/oauth2/v1/userinfo?alt=json", headers: headers)
             .flatMapThrowing { res in
                 if res.status == .ok {
                     return (try res.content.decode(GoogleUser.self), token)

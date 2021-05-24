@@ -6,7 +6,7 @@ extension Environment {
         case apiHost = "API_HOST"
         case apiPort = "API_PORT"
 
-        var value: String! {
+        var value: String? {
             Environment.get(rawValue)
         }
     }
