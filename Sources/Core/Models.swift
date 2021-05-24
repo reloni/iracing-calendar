@@ -14,7 +14,7 @@ public struct NavbarItem: Codable {
     }
 }
 
-public struct Serie: Codable {
+public struct Serie: Codable, Content {
     public let uuid: UUID
     public let name: String
     public let nextRace: String

@@ -12,6 +12,16 @@
             "runOptions": {
                 "instanceLimit": 2
             }
+        },
+        {
+            "label": "Run api",
+            "type": "shell",
+            "command": "Scripts/run-api.sh",
+            "group": "build",
+            "problemMatcher": [],
+            "runOptions": {
+                "instanceLimit": 2
+            }
         }
     ]
 }
