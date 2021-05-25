@@ -33,6 +33,8 @@ let package = Package(
             name: "Api",
             dependencies: [
                 .product(name: "Vapor", package: "vapor"),
+                .product(name: "Fluent", package: "fluent"),
+                .product(name: "FluentPostgresDriver", package: "fluent-postgres-driver"),
                 .target(name: "Core")
             ],
             swiftSettings: [
