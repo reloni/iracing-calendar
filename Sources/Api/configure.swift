@@ -13,78 +13,10 @@ public func configure(_ app: Application) throws {
     ), as: .psql)
 
     app.migrations.add(
-        CreateGalaxy(),
-        UpdateGalaxy(),
-        UpdateGalaxy2()
+        Migration1()
     )
     try app.autoMigrate().wait()
 
     // register routes
     try routes(app)
-}
-
-final class Galaxy: Model {
-    // Name of the table or collection.
-    static let schema = "galaxies"
-
-    // Unique identifier for this Galaxy.
-    @ID(key: .id)
-    var id: UUID?
-
-    // The Galaxy's name.
-    @Field(key: "name")
-    var name: String
-
-    // Creates a new, empty Galaxy.
-    init() { }
-
-    // Creates a new Galaxy with all properties set.
-    init(id: UUID? = nil, name: String) {
-        self.id = id
-        self.name = name
-    }
-}
-
-struct CreateGalaxy: Migration {
-    // Prepares the database for storing Galaxy models.
-    func prepare(on database: Database) -> EventLoopFuture<Void> {
-        database.schema("galaxies")
-            .id()
-            .field("name", .string)
-            .create()
-    }
-
-    // Optionally reverts the changes made in the prepare method.
-    func revert(on database: Database) -> EventLoopFuture<Void> {
-        database.schema("galaxies").delete()
-    }
-}
-
-struct UpdateGalaxy: Migration {
-    // Prepares the database for storing Galaxy models.
-    func prepare(on database: Database) -> EventLoopFuture<Void> {
-        database.schema("galaxies")
-            .field("name2", .string)
-            .update()
-    }
-
-    // Optionally reverts the changes made in the prepare method.
-    func revert(on database: Database) -> EventLoopFuture<Void> {
-        database.schema("galaxies").field("name2", .string).delete()
-    }
-}
-
-struct UpdateGalaxy2: Migration {
-    // Prepares the database for storing Galaxy models.
-    func prepare(on database: Database) -> EventLoopFuture<Void> {
-        database.schema("galaxies")
-            .deleteField("name2")
-            .update()
-    }
-
-    // Optionally reverts the changes made in the prepare method.
-    func revert(on database: Database) -> EventLoopFuture<Void> {
-        database.eventLoop.makeSucceededVoidFuture()
-        // database.schema("galaxies").field("name2", .string).delete()
-    }
 }
