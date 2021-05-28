@@ -7,6 +7,7 @@ struct Migration1: Migration {
                         .schema("seasons")
                         .id()
                         .field("name", .string, .required)
+                        .field("isactive", .bool, .required)
                         .create()
 
         let series = database

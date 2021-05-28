@@ -16,6 +16,7 @@ struct ApiController: RouteCollection {
         group.post("set-favorite-status", use: setFavoriteStatus)
         group.get("all-series", use: allRacingSeries)
         group.get("all-seasons", use: allSeasons)
+        group.get("current-season", use: currentSeason)
     }
 
     // func listAllSeries(req: Request) throws -> EventLoopFuture<[Serie]> {
@@ -40,5 +41,16 @@ struct ApiController: RouteCollection {
 
     func allSeasons(req: Request) throws -> EventLoopFuture<[RacingSeason]> {
         RacingSeason.query(on: req.db).with(\.$series).all()
+    }
+
+    func currentSeason(req: Request) throws -> EventLoopFuture<Response> {
+        RacingSeason
+            .query(on: req.db)
+            .filter(\.$isActive, .equal, .BooleanLiteralType(booleanLiteral: true))
+            .with(\.$series)
+            .first()
+            .flatMap { season in
+                season?.encodeResponse(for: req) ?? req.eventLoop.makeSucceededFuture(Response()).encodeResponse(for: req)
+            }
     }
 }

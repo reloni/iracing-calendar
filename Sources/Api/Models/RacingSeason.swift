@@ -11,6 +11,9 @@ final class RacingSeason: Model, Content {
     @Field(key: "name")
     var name: String
 
+    @Field(key: "isactive")
+    var isActive: Bool
+
     @Siblings(through: RacingSeasonRacingSeriePivot.self, from: \.$season, to: \.$serie)
     var series: [RacingSerie]
 
