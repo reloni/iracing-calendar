@@ -17,10 +17,14 @@ final class RacingSerie: Model, Content {
     @Field(key: "logourl")
     var logoUrl: String
 
+    @Parent(key: "seasonid")
+    var season: RacingSeason
+
     init() { }
 
-    init(id: UUID? = nil, name: String, homePage: String, logoUrl: String) {
+    init(id: UUID? = nil, season: RacingSeason, name: String, homePage: String, logoUrl: String) {
         self.id = id
+        self.$season.id = season.id!
         self.name = name
         self.homePage = homePage
         self.logoUrl = logoUrl

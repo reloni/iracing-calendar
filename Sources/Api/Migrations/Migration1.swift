@@ -16,15 +16,10 @@ struct Migration1: Migration {
                         .field("name", .string, .required)
                         .field("homepage", .string, .required)
                         .field("logourl", .string, .required)
-                        .create()
-
-        let seasonSeriePivot = database.schema("seasonseriepivot")
-                        .id()
-                        .field("seasonid", .uuid, .required, .references("seasons", "id", onDelete: .cascade))
-                        .field("serieid", .uuid, .required, .references("series", "id", onDelete: .cascade))
+                        .field("seasonid", .uuid, .required, .references("seasons", "id"))
                         .create()
         
-        return database.eventLoop.flatten([seasons, series, seasonSeriePivot])
+        return database.eventLoop.flatten([seasons, series])
     }
 
     func revert(on database: Database) -> EventLoopFuture<Void> {

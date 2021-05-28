@@ -14,7 +14,7 @@ final class RacingSeason: Model, Content {
     @Field(key: "isactive")
     var isActive: Bool
 
-    @Siblings(through: RacingSeasonRacingSeriePivot.self, from: \.$season, to: \.$serie)
+    @Children(for: \.$season)
     var series: [RacingSerie]
 
     init() { }
