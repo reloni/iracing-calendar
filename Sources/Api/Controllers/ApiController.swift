@@ -48,6 +48,7 @@ struct ApiController: RouteCollection {
             .query(on: req.db)
             .filter(\.$isActive, .equal, .BooleanLiteralType(booleanLiteral: true))
             .with(\.$series)
+            .with(\.$series, { $0.with(\.$weeks) })
             .first()
             .flatMap { season in
                 season?.encodeResponse(for: req) ?? req.eventLoop.makeSucceededFuture(Response()).encodeResponse(for: req)

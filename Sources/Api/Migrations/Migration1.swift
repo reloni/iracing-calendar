@@ -18,15 +18,22 @@ struct Migration1: Migration {
                         .field("logourl", .string, .required)
                         .field("seasonid", .uuid, .required, .references("seasons", "id"))
                         .create()
+
+        let weekEntries = database
+                        .schema("weekentries")
+                        .id()
+                        .field("trackname", .string, .required)
+                        .field("serieid", .uuid, .required, .references("series", "id"))
+                        .create()
         
-        return database.eventLoop.flatten([seasons, series])
+        return database.eventLoop.flatten([seasons, series, weekEntries])
     }
 
     func revert(on database: Database) -> EventLoopFuture<Void> {
         database.eventLoop.flatten([
             database.schema("seasons").delete(),
             database.schema("series").delete(),
-            database.schema("seasonseriepivot").delete()
+            database.schema("weekentries").delete(),
         ])
     }
 }

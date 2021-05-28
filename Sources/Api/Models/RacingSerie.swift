@@ -20,11 +20,14 @@ final class RacingSerie: Model, Content {
     @Parent(key: "seasonid")
     var season: RacingSeason
 
+    @Children(for: \.$serie)
+    var weeks: [RacingWeekEntry]
+
     init() { }
 
-    init(id: UUID? = nil, season: RacingSeason, name: String, homePage: String, logoUrl: String) {
+    init(id: UUID? = nil, season: RacingSeason, name: String, homePage: String, logoUrl: String) throws {
         self.id = id
-        self.$season.id = season.id!
+        self.$season.id = try season.requireID()
         self.name = name
         self.homePage = homePage
         self.logoUrl = logoUrl
