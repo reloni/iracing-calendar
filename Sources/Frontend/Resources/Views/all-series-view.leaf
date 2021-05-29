@@ -21,16 +21,16 @@
             class="form-check-input"
             type="checkbox"
             value=""
-            serieUuid="#(serie.uuid)"
+            serieUuid="#(serie.id)"
             onclick="toggleFavorite(event);"
             #if(serie.isFavorite): checked #endif
           />
         </td>
         <td>#(serie.name)</td>
-        <td>#(serie.nextRace)</td>
-        <td>#(serie.startDate)</td>
-        <td>#(serie.length)</td>
-        <td>#(serie.track)</td>
+        <td>Next race</td>
+        <td>Start date</td>
+        <td>Length</td>
+        <td>#(serie.currentWeek.trackName)</td>
       </tr>
       #endfor
     </tbody>

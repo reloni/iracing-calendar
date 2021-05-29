@@ -39,3 +39,32 @@ public struct Serie: Codable, Content {
         self.isFavorite = isFavorite
     }
 }
+
+public struct RacingSeason: Codable, Content {
+    public let id: UUID
+
+    public let name: String
+
+    public let series: [RacingSerie]
+}
+
+public struct RacingSerie: Codable, Content {
+    public let id: UUID
+
+    public let name: String
+
+    public let homePage: String
+
+    public let logoUrl: String
+
+    public let weeks: [RacingWeekEntry]
+
+    public let currentWeek: RacingWeekEntry = .init(id: UUID(), trackName: ":)")
+}
+
+public struct RacingWeekEntry: Codable, Content {
+
+    public let id: UUID
+
+    public let trackName: String
+}
