@@ -6,6 +6,8 @@
 
 drop schema calendar cascade;
 CREATE SCHEMA calendar;
+GRANT ALL ON SCHEMA calendar TO apiuser;
+GRANT ALL ON SCHEMA calendar TO postgres;
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
@@ -32,7 +34,4 @@ VALUES (uuid_generate_v4(), 'Week 2', 'fd940986-df00-4cac-9826-a84e9a23eb5c');
 
 select * from weekentries;
 
-
-SELECT t.table_schema
-FROM   INFORMATION_SCHEMA.TABLES as t
-WHERE  TABLE_TYPE = 'BASE TABLE'
+truncate table seasons cascade;
