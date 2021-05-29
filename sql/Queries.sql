@@ -1,30 +1,38 @@
 -- drop table seasonseriepivot;
-drop table series;
-drop table seasons;
-drop table _fluent_migrations;
+-- drop table weekentries;
+-- drop table series;
+-- drop table seasons;
+-- drop table _fluent_migrations;
+
+drop schema calendar cascade;
+CREATE SCHEMA calendar;
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 
 -- seasons
 insert into seasons (id, name, isactive) 
-VALUES (uuid_generate_v4(), '2021 S1', true);
+VALUES (uuid_generate_v4(), '2021 S1', false);
+
+insert into seasons (id, name, isactive) 
+VALUES (uuid_generate_v4(), '2021 S2', true);
 
 select * from seasons;
 
 -- series
-insert into series(id, name, homepage, logourl) 
-VALUES (uuid_generate_v4(), 'Test serie 3', '', '');
+insert into series(id, name, seasonid, homepage, logourl) 
+VALUES (uuid_generate_v4(), 'Test serie 1', '89775b78-9626-4c07-aab9-8e9a6c5b34b7', '', '');
 
 select * from series;
 
--- season serie rel
-select * from "season-serie-pivot"
+-- week entries
 
-INSERT INTO seasonseriepivot (id, seasonid, serieid)
-VALUES (uuid_generate_v4(), '89456e17-7774-4ed1-882a-7ef85dd20685', 'c9a50a7f-19b0-4765-ab3a-018b6e84bdd1')
+insert into weekentries(id, trackname, serieid) 
+VALUES (uuid_generate_v4(), 'Week 2', 'fd940986-df00-4cac-9826-a84e9a23eb5c');
 
-select season.name, serie.name
-from series as serie
-JOIN seasonseriepivot as pivot on serie.id = pivot.serieid
-JOIN seasons as season on pivot.seasonid = season.id
+select * from weekentries;
+
+
+SELECT t.table_schema
+FROM   INFORMATION_SCHEMA.TABLES as t
+WHERE  TABLE_TYPE = 'BASE TABLE'
