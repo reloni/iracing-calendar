@@ -42,29 +42,31 @@ public struct Serie: Codable, Content {
 
 public struct RacingSeason: Codable, Content {
     public let id: UUID
-
     public let name: String
-
     public let series: [RacingSerie]
 }
 
 public struct RacingSerie: Codable, Content {
     public let id: UUID
-
     public let name: String
-
     public let homePage: String
-
     public let logoUrl: String
-
     public let weeks: [RacingWeekEntry]
+    public let currentWeek: RacingWeekEntry
 
-    public let currentWeek: RacingWeekEntry = .init(id: UUID(), trackName: ":)")
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        name = try container.decode(String.self, forKey: .name)
+        homePage = try container.decode(String.self, forKey: .homePage)
+        logoUrl = try container.decode(String.self, forKey: .logoUrl)
+        weeks = try container.decode([RacingWeekEntry].self, forKey: .weeks)
+
+        currentWeek = weeks[0]
+    }
 }
 
 public struct RacingWeekEntry: Codable, Content {
-
     public let id: UUID
-
     public let trackName: String
 }
