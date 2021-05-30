@@ -10,6 +10,8 @@ let package = Package(
         // 💧 A server-side Swift web framework.
         .package(url: "https://github.com/vapor/vapor.git", .exact("4.45.2")),
         .package(url: "https://github.com/vapor/leaf", .exact("4.1.2")),
+        .package(url: "https://github.com/vapor/fluent-postgres-driver", .exact("2.1.2")),
+        .package(url: "https://github.com/vapor/fluent", .exact("4.3.0"))
     ],
     targets: [
         .target(
@@ -31,6 +33,8 @@ let package = Package(
             name: "Api",
             dependencies: [
                 .product(name: "Vapor", package: "vapor"),
+                .product(name: "Fluent", package: "fluent"),
+                .product(name: "FluentPostgresDriver", package: "fluent-postgres-driver"),
                 .target(name: "Core")
             ],
             swiftSettings: [

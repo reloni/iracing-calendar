@@ -7,10 +7,12 @@ enum ApiUri {
 
     case allSeries
     case setFavoriteStatus
+    case currentSeason
 
     var url: URI {
         switch self {
             case .allSeries: return "\(Self.base)/api/all-series"
+            case .currentSeason: return "\(Self.base)/api/current-season"
             case .setFavoriteStatus: return "\(Self.base)/api/set-favorite-status"
         }
     }

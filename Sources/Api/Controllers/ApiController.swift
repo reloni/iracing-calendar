@@ -12,13 +12,16 @@ var allSeries: [Serie] = [
 struct ApiController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
         let group = routes.grouped("api")
-        group.get("all-series", use: listAllSeries)
+        // group.get("all-series", use: listAllSeries)
         group.post("set-favorite-status", use: setFavoriteStatus)
+        group.get("all-series", use: allRacingSeries)
+        group.get("all-seasons", use: allSeasons)
+        group.get("current-season", use: currentSeason)
     }
 
-    func listAllSeries(req: Request) throws -> EventLoopFuture<[Serie]> {
-        return req.eventLoop.makeSucceededFuture(allSeries)
-    }
+    // func listAllSeries(req: Request) throws -> EventLoopFuture<[Serie]> {
+    //     return req.eventLoop.makeSucceededFuture(allSeries)
+    // }
 
     func setFavoriteStatus(req: Request) throws -> EventLoopFuture<Response> {
         let uuid = try req.query.get(UUID.self, at: "uuid")
@@ -30,5 +33,25 @@ struct ApiController: RouteCollection {
         }
 
         return req.eventLoop.makeSucceededFuture(.init(status: .ok))
+    }
+
+    func allRacingSeries(req: Request) throws -> EventLoopFuture<[RacingSerie]> {
+        RacingSerie.query(on: req.db).all()
+    }
+
+    func allSeasons(req: Request) throws -> EventLoopFuture<[RacingSeason]> {
+        RacingSeason.query(on: req.db).with(\.$series).all()
+    }
+
+    func currentSeason(req: Request) throws -> EventLoopFuture<Response> {
+        RacingSeason
+            .query(on: req.db)
+            .filter(\.$isActive, .equal, .BooleanLiteralType(booleanLiteral: true))
+            .with(\.$series)
+            .with(\.$series, { $0.with(\.$weeks) })
+            .first()
+            .flatMap { season in
+                season?.encodeResponse(for: req) ?? req.eventLoop.makeSucceededFuture(Response()).encodeResponse(for: req)
+            }
     }
 }
