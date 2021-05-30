@@ -1,6 +1,6 @@
 import Vapor
 
-public struct GoogleUser: Codable {
+public struct GoogleUser: Codable, Content {
     public let name: String?
     public let email: String
     public let picture: URL?

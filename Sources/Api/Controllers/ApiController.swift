@@ -17,6 +17,7 @@ struct ApiController: RouteCollection {
         group.get("all-series", use: allRacingSeries)
         group.get("all-seasons", use: allSeasons)
         group.get("current-season", use: currentSeason)
+        group.post(["oauth", "authorize", "google"], use: authorizeWithGoogleToken)
     }
 
     // func listAllSeries(req: Request) throws -> EventLoopFuture<[Serie]> {
@@ -41,6 +42,26 @@ struct ApiController: RouteCollection {
 
     func allSeasons(req: Request) throws -> EventLoopFuture<[RacingSeason]> {
         RacingSeason.query(on: req.db).with(\.$series).all()
+    }
+
+    func authorizeWithGoogleToken(req: Request) throws -> EventLoopFuture<GoogleUser> {
+        let token = try req.content.decode(GoogleTokenData.self)
+        return loadUserInfo(on: req, with: token)
+    }
+
+    func loadUserInfo(on request: Request, with token: GoogleTokenData) -> EventLoopFuture<GoogleUser> {
+        app.logger.info("Load user info")
+        var headers = HTTPHeaders()
+        headers.bearerAuthorization = BearerAuthorization(token: token.access_token)
+        return request.client
+            .get("https://www.googleapis.com/oauth2/v1/userinfo?alt=json", headers: headers)
+            .flatMapThrowing { res in
+                if res.status == .ok {
+                    return try res.content.decode(GoogleUser.self)
+                } else {
+                    throw Abort(.internalServerError)
+                }
+            }
     }
 
     func currentSeason(req: Request) throws -> EventLoopFuture<Response> {

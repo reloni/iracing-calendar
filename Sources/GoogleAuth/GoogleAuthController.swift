@@ -45,7 +45,7 @@ public struct GoogleAuthController: RouteCollection {
         }.flatMapThrowing { res in
             try res.content.decode(GoogleTokenData.self)
         }.flatMap { token in
-            GoogleAuthController.loadUserInfo(on: request, with: token)
+            GoogleAuthController.authorize(on: request, with: token)
         }.flatMap { user, token in 
             request.session.user = 
                 SessionUser(uuid: UUID(), 
@@ -67,11 +67,9 @@ public struct GoogleAuthController: RouteCollection {
         }
     }
 
-    static func loadUserInfo(on request: Request, with token: GoogleTokenData) -> EventLoopFuture<(GoogleUser, GoogleTokenData)> {
-        var headers = HTTPHeaders()
-        headers.bearerAuthorization = BearerAuthorization(token: token.access_token)
+    static func authorize(on request: Request, with token: GoogleTokenData) -> EventLoopFuture<(GoogleUser, GoogleTokenData)> {
         return request.client
-            .get("https://www.googleapis.com/oauth2/v1/userinfo?alt=json", headers: headers)
+            .post(ApiUri.authorizeGoogle.url) { req in  try req.content.encode(token, as: .json) }
             .flatMapThrowing { res in
                 if res.status == .ok {
                     return (try res.content.decode(GoogleUser.self), token)
