@@ -47,6 +47,25 @@ struct ApiController: RouteCollection {
     func authorizeWithGoogleToken(req: Request) throws -> EventLoopFuture<GoogleUser> {
         let token = try req.content.decode(GoogleTokenData.self)
         return loadUserInfo(on: req, with: token)
+                    .flatMap { Self.updateOrCreateUser(for: req, with: $0) }
+    }
+
+    static func updateOrCreateUser(for req: Request, with user: GoogleUser) -> EventLoopFuture<GoogleUser> {
+        return DbUser
+            .query(on: req.db)
+            .filter(\.$email, .equal, user.email)
+            .first()
+            .flatMap { dbUser -> EventLoopFuture<Void> in 
+                if dbUser == nil {
+                    app.logger.info("Create new user")
+                    let newUser = DbUser.init(name: user.name ?? "", email: user.email, pictureUrl: user.picture?.absoluteString)
+                    return newUser.create(on: req.db)
+                } else {
+                    app.logger.info("User exists")
+                    return req.eventLoop.makeSucceededVoidFuture()
+                }
+            }
+            .map { _ in user }
     }
 
     func loadUserInfo(on request: Request, with token: GoogleTokenData) -> EventLoopFuture<GoogleUser> {

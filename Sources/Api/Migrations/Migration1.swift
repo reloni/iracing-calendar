@@ -25,8 +25,17 @@ struct Migration1: Migration {
                         .field("trackname", .string, .required)
                         .field("serieid", .uuid, .required, .references("series", "id"))
                         .create()
+
+        let users = database
+                        .schema("users")
+                        .id()
+                        .field("name", .string, .required)
+                        .field("email", .string, .required)
+                        .field("pictureurl", .string)
+                        .unique(on: "email")
+                        .create()
         
-        return database.eventLoop.flatten([seasons, series, weekEntries])
+        return database.eventLoop.flatten([seasons, series, weekEntries, users])
     }
 
     func revert(on database: Database) -> EventLoopFuture<Void> {
