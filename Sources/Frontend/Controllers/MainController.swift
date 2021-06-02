@@ -43,10 +43,12 @@ struct MainController: RouteCollection {
             .init(title: "All series", link: "all-series", isActive: false),
             .init(title: "Profile", link: "home", isActive: false),
         ]
-        return req.client.get(ApiUri.allSeries.url)
-            .flatMapThrowing { try $0.content.decode([Serie].self).filter { $0.isFavorite } }
-            .map { SeriesViewContext.init(title: "Favorite series", user: req.session.user, series: $0, navbarItems: navbarItems) }
-            .flatMap { req.view.render("favorite-series-view", $0) }
+        return req.view.render("favorite-series-view", 
+                               SeriesViewContext.init(title: "Favorite series", user: req.session.user, series: [], navbarItems: navbarItems))
+        // return req.client.get(ApiUri.allSeries.url)
+        //     .flatMapThrowing { try $0.content.decode([Serie].self).filter { $0.isFavorite } }
+        //     .map { SeriesViewContext.init(title: "Favorite series", user: req.session.user, series: $0, navbarItems: navbarItems) }
+        //     .flatMap { req.view.render("favorite-series-view", $0) }
     }
 
     func setFavoriteStatus(req: Request) throws -> EventLoopFuture<Response> {
