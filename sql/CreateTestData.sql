@@ -1,3 +1,8 @@
+-- drop
+drop schema calendar cascade;
+CREATE SCHEMA calendar;
+GRANT ALL ON SCHEMA calendar TO apiuser;
+
 -- seasons
 
 insert into seasons (id, name, isactive) 

@@ -19,6 +19,6 @@ public extension Session {
 
     func decode<T: Decodable>(_ type: T.Type, key: String) -> T? {
         guard let data = self.data[key]?.data(using: .utf8) else { return nil }
-        return try? JSONDecoder().decode(type, from: data)   
+        return try? JSONDecoder().decode(type, from: data)
     }
 }
