@@ -47,12 +47,7 @@ public struct GoogleAuthController: RouteCollection {
         }.flatMap { token in
             GoogleAuthController.authorize(on: request, with: token)
         }.flatMap { user, token in 
-            request.session.user = 
-                SessionUser(uuid: UUID(), 
-                            name: user.name ?? "", 
-                            email: user.email, 
-                            profileImage: user.picture?.absoluteString,
-                            token: token)
+            request.session.user = SessionUser(user: user, token: token)
             
             let response = request.redirect(to: "/")
             response.cookies["token"] = 
@@ -67,12 +62,12 @@ public struct GoogleAuthController: RouteCollection {
         }
     }
 
-    static func authorize(on request: Request, with token: GoogleTokenData) -> EventLoopFuture<(GoogleUser, GoogleTokenData)> {
+    static func authorize(on request: Request, with token: GoogleTokenData) -> EventLoopFuture<(User, GoogleTokenData)> {
         return request.client
             .post(ApiUri.authorizeGoogle.url) { req in  try req.content.encode(token, as: .json) }
             .flatMapThrowing { res in
                 if res.status == .ok {
-                    return (try res.content.decode(GoogleUser.self), token)
+                    return (try res.content.decode(User.self), token)
                 } else {
                     throw Abort(.internalServerError)
                 }

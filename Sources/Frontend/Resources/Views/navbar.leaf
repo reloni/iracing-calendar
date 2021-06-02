@@ -25,10 +25,10 @@
         #else:
         <ul class="navbar-nav">
           <li class="nav-item">
-            <a href="/profile" class="nav-link">#(user.name)</a>
+            <a href="/profile" class="nav-link">#(user.user.name)</a>
           </li>
         </ul>
-        <img src="#(user.profileImage)" class="rounded-circle" style="height:auto;width:40px;">
+        <img src="#(user.user.pictureUrl)" class="rounded-circle" style="height:auto;width:40px;">
         #endif
       </div>
     </div>

@@ -70,3 +70,10 @@ public struct RacingWeekEntry: Codable, Content {
     public let id: UUID
     public let trackName: String
 }
+
+public struct User: Codable, Content {
+    public let id: UUID
+    public let name: String
+    public let email: String
+    public let pictureUrl: String?
+}
