@@ -27,11 +27,12 @@ struct ApiController: RouteCollection {
     func setFavoriteStatus(req: Request) throws -> EventLoopFuture<Response> {
         let uuid = try req.query.get(UUID.self, at: "uuid")
         let isFavorite = try req.query.get(Bool.self, at: "isFavorite")
+        // app.logger.info("User id \(req.session.user?.user.id.uuidString ?? "")")
         app.logger.info("Set isFavorite \(isFavorite) to \(uuid)")
         
-        if let index = allSeries.firstIndex(where: { $0.uuid == uuid }) {
-            allSeries[index].isFavorite = isFavorite
-        }
+        // if let index = allSeries.firstIndex(where: { $0.uuid == uuid }) {
+        //     allSeries[index].isFavorite = isFavorite
+        // }
 
         return req.eventLoop.makeSucceededFuture(.init(status: .ok))
     }

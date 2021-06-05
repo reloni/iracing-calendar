@@ -35,3 +35,5 @@ VALUES (uuid_generate_v4(), 'Week 2', 'fd940986-df00-4cac-9826-a84e9a23eb5c');
 select * from weekentries;
 
 truncate table seasons cascade;
+
+select * from users;
