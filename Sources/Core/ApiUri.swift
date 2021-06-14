@@ -2,7 +2,7 @@ import Vapor
 
 public enum ApiUri {
     public static let base: URI = {
-        "\(Environment.EnvVar.apiProtocol.value!)://\(Environment.EnvVar.apiHost.value!):\(Environment.EnvVar.apiPort.value!)"
+        "\(Environment.FrontendEnvVar.apiProtocol.value!)://\(Environment.FrontendEnvVar.apiHost.value!):\(Environment.FrontendEnvVar.apiPort.value!)"
     }()
 
     case allSeries

@@ -1,5 +1,6 @@
 import Vapor
 import Core
+import JWT
 
 var allSeries: [Serie] = [
     .init(uuid: UUID(), name: "Porsche iRacing Cup", nextRace: "2 minutes", startDate: "11 May", length: "16 laps", track: "Hockenheimring Baden-Württemberg - Grand Prix", isFavorite: false),
@@ -47,6 +48,21 @@ struct ApiController: RouteCollection {
 
     func authorizeWithGoogleToken(req: Request) throws -> EventLoopFuture<DbUser> {
         let token = try req.content.decode(GoogleTokenData.self)
+        // print(token)
+        app.jwt.google.applicationIdentifier = Environment.BackendEnvVar.googleClientid.value
+        //"245437233096-78hc9c57rkv5rpa9ctbqjrs69dfhhsv0.apps.googleusercontent.com"
+        // app.jwt.google.gSuiteDomainName = "charlesproxy.com"
+        
+        // let a: TestPayload = 
+        return req.jwt.google.verify(token.id_token).map { token -> DbUser in
+            print("test payload")
+            print(token.email) // GoogleIdentityToken
+            fatalError()
+        }
+        
+        // print("test payload")
+        // print(a)
+        
         return loadUserInfo(on: req, with: token)
                     .flatMap { Self.updateOrCreateUser(for: req, with: $0) }
     }
@@ -93,5 +109,34 @@ struct ApiController: RouteCollection {
             .flatMap { season in
                 season?.encodeResponse(for: req) ?? req.eventLoop.makeSucceededFuture(Response()).encodeResponse(for: req)
             }
+    }
+}
+
+// JWT payload structure.
+struct TestPayload: JWTPayload {
+    // Maps the longer Swift property names to the
+    // shortened keys used in the JWT payload.
+    enum CodingKeys: String, CodingKey {
+        case subject = "sub"
+        case expiration = "exp"
+        case email = "email"
+    }
+
+    // The "sub" (subject) claim identifies the principal that is the
+    // subject of the JWT.
+    var subject: SubjectClaim
+
+    // The "exp" (expiration time) claim identifies the expiration time on
+    // or after which the JWT MUST NOT be accepted for processing.
+    var expiration: ExpirationClaim
+
+    var email: String
+
+    // Run any additional verification logic beyond
+    // signature verification here.
+    // Since we have an ExpirationClaim, we will
+    // call its verify method.
+    func verify(using signer: JWTSigner) throws {
+        // try self.expiration.verifyNotExpired()
     }
 }

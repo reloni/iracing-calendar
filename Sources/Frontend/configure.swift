@@ -11,7 +11,7 @@ public func configure(_ app: Application) throws {
     app.leaf.cache.isEnabled = app.environment.isRelease
     app.views.use(.leaf)
 
-    checkEnvironmentVariables(for: app, expectedVariables: Environment.EnvVar.allCases.map { $0.rawValue })
+    checkEnvironmentVariables(for: app, tag: Environment.frontend)
 
     // register routes
     try routes(app)

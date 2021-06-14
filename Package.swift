@@ -11,7 +11,8 @@ let package = Package(
         .package(url: "https://github.com/vapor/vapor.git", .exact("4.45.2")),
         .package(url: "https://github.com/vapor/leaf", .exact("4.1.2")),
         .package(url: "https://github.com/vapor/fluent-postgres-driver", .exact("2.1.2")),
-        .package(url: "https://github.com/vapor/fluent", .exact("4.3.0"))
+        .package(url: "https://github.com/vapor/fluent", .exact("4.3.0")),
+        .package(url: "https://github.com/vapor/jwt.git", .exact("4.0.0"))
     ],
     targets: [
         .target(
@@ -35,6 +36,7 @@ let package = Package(
                 .product(name: "Vapor", package: "vapor"),
                 .product(name: "Fluent", package: "fluent"),
                 .product(name: "FluentPostgresDriver", package: "fluent-postgres-driver"),
+                .product(name: "JWT", package: "jwt"),
                 .target(name: "Core")
             ],
             swiftSettings: [
