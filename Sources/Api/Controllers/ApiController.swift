@@ -49,7 +49,7 @@ struct ApiController: RouteCollection {
     func authorizeWithGoogleToken(req: Request) throws -> EventLoopFuture<DbUser> {
         let token = try req.content.decode(GoogleTokenData.self)
         // print(token)
-        app.jwt.google.applicationIdentifier = Environment.BackendEnvVar.googleClientid.value
+        
         //"245437233096-78hc9c57rkv5rpa9ctbqjrs69dfhhsv0.apps.googleusercontent.com"
         // app.jwt.google.gSuiteDomainName = "charlesproxy.com"
         
