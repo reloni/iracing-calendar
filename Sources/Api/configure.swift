@@ -1,16 +1,23 @@
 import Vapor
 import Fluent
 import FluentPostgresDriver
+import Core
 
 // configures your application
 public func configure(_ app: Application) throws {
-    app.databases.use(.postgres(
-        hostname: Environment.get("DATABASE_HOST") ?? "localhost",
-        port: Environment.get("DATABASE_PORT").flatMap(Int.init(_:)) ?? PostgresConfiguration.ianaPortNumber,
-        username: Environment.get("DATABASE_USERNAME") ?? "vapor_username",
-        password: Environment.get("DATABASE_PASSWORD") ?? "vapor_password",
-        database: Environment.get("DATABASE_NAME") ?? "vapor_database"
-    ), as: .psql)
+    checkEnvironmentVariables(for: app, tag: Environment.api)
+
+    app.jwt.google.applicationIdentifier = Environment.api.cases.googleClientId.value
+
+    var config = PostgresConfiguration(
+        hostname: Environment.api.cases.databaseHost.value!,
+        port: Environment.api.cases.databasePort.value.flatMap(Int.init(_:))!,
+        username: Environment.api.cases.databaseUserName.value!,
+        password: Environment.api.cases.databasePassword.value!,
+        database: Environment.api.cases.databaseName.value!
+    )
+    config.searchPath = [Environment.api.cases.databaseSearchPath.value!]
+    app.databases.use(.postgres(configuration: config), as: .psql)
 
     app.migrations.add(
         Migration1()

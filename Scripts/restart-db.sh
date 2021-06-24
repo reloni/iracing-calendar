@@ -7,6 +7,8 @@ CONTAINER_NAME=iRacing-calendar-db
 
 docker rm -f $CONTAINER_NAME || true
 export $(cat ./Sources/Api/.env | xargs)
-docker run -d --rm --name $CONTAINER_NAME -h $CONTAINER_NAME \
+docker run -d
+
+ --name $CONTAINER_NAME -h $CONTAINER_NAME \
         -e "POSTGRES_USER=${DATABASE_USERNAME}" -e "POSTGRES_PASSWORD=${DATABASE_PASSWORD}" -e "POSTGRES_HOST=${DATABASE_HOST}" \
         -e "POSTGRES_PORT=${DATABASE_PORT}" -e "POSTGRES_DB=${DATABASE_NAME}" -p 5432:5432 postgres:13.3-alpine
