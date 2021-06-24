@@ -1,5 +1,5 @@
 -- drop
-drop schema calendar cascade;
+drop schema if exists calendar cascade;
 CREATE SCHEMA calendar;
 GRANT ALL ON SCHEMA calendar TO apiuser;
 

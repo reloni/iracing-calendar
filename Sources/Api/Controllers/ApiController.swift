@@ -48,53 +48,23 @@ struct ApiController: RouteCollection {
 
     func authorizeWithGoogleToken(req: Request) throws -> EventLoopFuture<DbUser> {
         let token = try req.content.decode(GoogleTokenData.self)
-        // print(token)
-        
-        //"245437233096-78hc9c57rkv5rpa9ctbqjrs69dfhhsv0.apps.googleusercontent.com"
-        // app.jwt.google.gSuiteDomainName = "charlesproxy.com"
-        
-        // let a: TestPayload = 
-        return req.jwt.google.verify(token.id_token).map { token -> DbUser in
-            print("test payload")
-            print(token.email) // GoogleIdentityToken
-            fatalError()
-        }
-        
-        // print("test payload")
-        // print(a)
-        
-        return loadUserInfo(on: req, with: token)
-                    .flatMap { Self.updateOrCreateUser(for: req, with: $0) }
+        return req.jwt.google.verify(token.id_token)
+            .flatMap { Self.updateOrCreateUser(for: req, with: $0) }
     }
 
-    static func updateOrCreateUser(for req: Request, with user: GoogleUser) -> EventLoopFuture<DbUser> {
+    static func updateOrCreateUser(for req: Request, with token: GoogleIdentityToken) -> EventLoopFuture<DbUser> {
         return DbUser
             .query(on: req.db)
-            .filter(\.$email, .equal, user.email)
+            .filter(\.$email, .equal, token.email!)
             .first()
             .flatMap { dbUser -> EventLoopFuture<DbUser> in 
                 if dbUser == nil {
                     app.logger.info("Create new user")
-                    let newUser = DbUser.init(name: user.name ?? "", email: user.email, pictureUrl: user.picture?.absoluteString)
+                    let newUser = DbUser.init(name: token.name ?? "", email: token.email!, pictureUrl: token.picture)
                     return newUser.create(on: req.db).map { _ in newUser }
                 } else {
                     app.logger.info("User exists")
                     return req.eventLoop.makeSucceededFuture(dbUser!)
-                }
-            }
-    }
-
-    func loadUserInfo(on request: Request, with token: GoogleTokenData) -> EventLoopFuture<GoogleUser> {
-        app.logger.info("Load user info")
-        var headers = HTTPHeaders()
-        headers.bearerAuthorization = BearerAuthorization(token: token.access_token)
-        return request.client
-            .get("https://www.googleapis.com/oauth2/v1/userinfo?alt=json", headers: headers)
-            .flatMapThrowing { res in
-                if res.status == .ok {
-                    return try res.content.decode(GoogleUser.self)
-                } else {
-                    throw Abort(.internalServerError)
                 }
             }
     }
@@ -109,34 +79,5 @@ struct ApiController: RouteCollection {
             .flatMap { season in
                 season?.encodeResponse(for: req) ?? req.eventLoop.makeSucceededFuture(Response()).encodeResponse(for: req)
             }
-    }
-}
-
-// JWT payload structure.
-struct TestPayload: JWTPayload {
-    // Maps the longer Swift property names to the
-    // shortened keys used in the JWT payload.
-    enum CodingKeys: String, CodingKey {
-        case subject = "sub"
-        case expiration = "exp"
-        case email = "email"
-    }
-
-    // The "sub" (subject) claim identifies the principal that is the
-    // subject of the JWT.
-    var subject: SubjectClaim
-
-    // The "exp" (expiration time) claim identifies the expiration time on
-    // or after which the JWT MUST NOT be accepted for processing.
-    var expiration: ExpirationClaim
-
-    var email: String
-
-    // Run any additional verification logic beyond
-    // signature verification here.
-    // Since we have an ExpirationClaim, we will
-    // call its verify method.
-    func verify(using signer: JWTSigner) throws {
-        // try self.expiration.verifyNotExpired()
     }
 }
