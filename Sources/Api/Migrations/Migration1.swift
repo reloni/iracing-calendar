@@ -35,13 +35,22 @@ struct Migration1: Migration {
                         .unique(on: "email")
                         .create()
 
+        let accessTokens = database
+                        .schema("accesstokens")
+                        .id()
+                        .field("userid", .uuid, .required, .references("users", "id"))
+                        .field("token", .string, .required)
+                        .field("expireat", .datetime, .required)
+                        .unique(on: "token")
+                        .create()
+
         let userSeriePivot = database.schema("userseriepivot")
                 .id()
                 .field("userid", .uuid, .required, .references("users", "id", onDelete: .cascade))
                 .field("serieid", .uuid, .required, .references("series", "id", onDelete: .cascade))
                 .create()
         
-        return database.eventLoop.flatten([seasons, series, weekEntries, users, userSeriePivot])
+        return database.eventLoop.flatten([seasons, series, weekEntries, users, accessTokens, userSeriePivot])
     }
 
     func revert(on database: Database) -> EventLoopFuture<Void> {
