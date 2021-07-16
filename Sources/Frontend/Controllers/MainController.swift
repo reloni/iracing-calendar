@@ -34,7 +34,7 @@ struct MainController: RouteCollection {
 
         return req.client.get(ApiUri.currentSeason.url)
             .flatMapThrowing { try $0.content.decode(RacingSeason.self) }
-            .map { SeriesViewContext2.init(title: "All Series", user: req.session.user, series: $0.series, navbarItems: navbarItems) }
+            .map { SeriesViewContext.init(title: "All Series", user: req.session.user, series: $0.series, navbarItems: navbarItems) }
             .flatMap { req.view.render("all-series-view", $0) }
     }
 

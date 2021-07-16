@@ -6,13 +6,6 @@ extension MainController {
     struct SeriesViewContext: ViewContext {
         let title: String
         let user: SessionUser?
-        let series: [Serie]
-        let navbarItems: [NavbarItem]
-    }
-
-    struct SeriesViewContext2: ViewContext {
-        let title: String
-        let user: SessionUser?
         let series: [RacingSerie]
         let navbarItems: [NavbarItem]
     }
