@@ -44,6 +44,7 @@ struct MainController: RouteCollection {
             .init(title: "All series", link: "all-series", isActive: false),
             .init(title: "Profile", link: "home", isActive: false),
         ]
+
         return req.view.render("favorite-series-view", 
                                SeriesViewContext.init(title: "Favorite series", user: req.session.user, series: [], navbarItems: navbarItems))
         // return req.client.get(ApiUri.allSeries.url)

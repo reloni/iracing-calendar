@@ -18,6 +18,8 @@ struct ApiController: RouteCollection {
         group.get("all-series", use: allRacingSeries)
         group.get("all-seasons", use: allSeasons)
         group.get("current-season", use: currentSeason)
+        group.get("favorite-series", use: favoriteSeries)
+        group.get("testJwt", use: testJwt)
         group.post(["oauth", "authorize", "google"], use: authorizeWithGoogleToken)
     }
 
@@ -30,6 +32,7 @@ struct ApiController: RouteCollection {
         let isFavorite = try req.query.get(Bool.self, at: "isFavorite")
         // app.logger.info("User id \(req.session.user?.user.id.uuidString ?? "")")
         app.logger.info("Set isFavorite \(isFavorite) to \(uuid)")
+        // app.logger.info("Usdr id \(req.session.user?.user.name ?? "")")
         
         // if let index = allSeries.firstIndex(where: { $0.uuid == uuid }) {
         //     allSeries[index].isFavorite = isFavorite
@@ -79,5 +82,19 @@ struct ApiController: RouteCollection {
             .flatMap { season in
                 season?.encodeResponse(for: req) ?? req.eventLoop.makeSucceededFuture(Response()).encodeResponse(for: req)
             }
+    }
+
+    func favoriteSeries(req: Request) throws -> EventLoopFuture<[RacingSerie]> {
+        let userId = "667fde52-d9fc-4675-82d2-c52486e93915"
+        return DbUser.find(UUID.init(uuidString: userId), on: req.db)
+            .unwrap(or: Abort(.notFound))
+            .flatMap { $0.$series.query(on: req.db).all() }
+    }
+
+    func testJwt(req: Request) -> EventLoopFuture<HTTPStatus> {
+        req.jwt.google.verify().map { token in
+            print(token) // GoogleIdentityToken
+            return .ok
+        }
     }
 }

@@ -17,7 +17,11 @@ final class DbUser: Model, Content {
     @Field(key: "pictureurl")
     var pictureUrl: String?
 
-    
+    @Siblings(
+        through: DbUserRacingSeriePivot.self,
+        from: \.$user,
+        to: \.$serie)
+    var series: [RacingSerie]
 
     init() { }
 
