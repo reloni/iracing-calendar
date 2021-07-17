@@ -52,19 +52,24 @@ struct ApiController: RouteCollection {
     func authorizeWithGoogleToken(req: Request) throws -> EventLoopFuture<DbUser> {
         let token = try req.content.decode(GoogleTokenData.self)
         return req.jwt.google.verify(token.id_token)
-            .flatMap { Self.updateOrCreateUser(for: req, with: $0) }
+            .flatMap { Self.updateOrCreateUser(for: req, with: $0, accessToken: token.access_token) }
     }
 
-    static func updateOrCreateUser(for req: Request, with token: GoogleIdentityToken) -> EventLoopFuture<DbUser> {
+    static func updateOrCreateUser(for req: Request, with idToken: GoogleIdentityToken, accessToken: String) -> EventLoopFuture<DbUser> {
         return DbUser
             .query(on: req.db)
-            .filter(\.$email, .equal, token.email!)
+            .filter(\.$email, .equal, idToken.email!)
             .first()
             .flatMap { dbUser -> EventLoopFuture<DbUser> in 
                 if dbUser == nil {
                     app.logger.info("Create new user")
-                    let newUser = DbUser.init(name: token.name ?? "", email: token.email!, pictureUrl: token.picture)
-                    return newUser.create(on: req.db).map { _ in newUser }
+                    
+                    let newUser = DbUser(name: idToken.name ?? "", email: idToken.email!, pictureUrl: idToken.picture)
+
+                    return newUser.create(on: req.db).flatMapThrowing { 
+                        try AccessToken(token: accessToken, expireAt: idToken.expires.value, user: newUser)
+                    }.flatMap { newUser.$tokens.create($0, on: req.db) }
+                    .map { _ in newUser }
                 } else {
                     app.logger.info("User exists")
                     return req.eventLoop.makeSucceededFuture(dbUser!)

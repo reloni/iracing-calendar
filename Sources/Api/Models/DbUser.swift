@@ -17,6 +17,9 @@ final class DbUser: Model, Content {
     @Field(key: "pictureurl")
     var pictureUrl: String?
 
+    @Children(for: \.$user)
+    var tokens: [AccessToken]
+
     @Siblings(
         through: DbUserRacingSeriePivot.self,
         from: \.$user,

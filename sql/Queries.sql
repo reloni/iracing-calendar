@@ -37,3 +37,7 @@ select * from weekentries;
 truncate table seasons cascade;
 
 select * from users;
+select * from userseriepivot;
+
+insert into userseriepivot(id, userid, serieid) 
+VALUES (uuid_generate_v4(), '667fde52-d9fc-4675-82d2-c52486e93915', '6a8a96db-cce4-4aa3-85f2-dcfaf75d8fa6');
