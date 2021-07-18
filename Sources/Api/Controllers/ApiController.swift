@@ -61,18 +61,23 @@ struct ApiController: RouteCollection {
             .filter(\.$email, .equal, idToken.email!)
             .first()
             .flatMap { dbUser -> EventLoopFuture<DbUser> in 
-                if dbUser == nil {
+                if let dbUser = dbUser {
+                    app.logger.info("User exists")
+                    return AccessToken
+                        .query(on: req.db)
+                        .filter(\.$token, .equal, accessToken)
+                        .first()
+                        .flatMap { $0?.delete(on: req.db) ?? req.eventLoop.makeSucceededFuture(()) }
+                        .flatMapThrowing { try AccessToken(token: accessToken, expireAt: idToken.expires.value, user: dbUser) }
+                        .flatMap { dbUser.$tokens.create($0, on: req.db) }
+                        .map { _ in dbUser }
+                } else {
                     app.logger.info("Create new user")
-                    
                     let newUser = DbUser(name: idToken.name ?? "", email: idToken.email!, pictureUrl: idToken.picture)
-
                     return newUser.create(on: req.db).flatMapThrowing { 
                         try AccessToken(token: accessToken, expireAt: idToken.expires.value, user: newUser)
                     }.flatMap { newUser.$tokens.create($0, on: req.db) }
                     .map { _ in newUser }
-                } else {
-                    app.logger.info("User exists")
-                    return req.eventLoop.makeSucceededFuture(dbUser!)
                 }
             }
     }
