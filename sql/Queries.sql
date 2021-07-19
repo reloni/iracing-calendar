@@ -34,10 +34,14 @@ VALUES (uuid_generate_v4(), 'Week 2', 'fd940986-df00-4cac-9826-a84e9a23eb5c');
 
 select * from weekentries;
 
-truncate table seasons cascade;
+truncate table users cascade;
 
 select * from users;
+select * from accesstokens;
 select * from userseriepivot;
 
+select * from pg_indexes
+where schemaname = 'calendar';
+
 insert into userseriepivot(id, userid, serieid) 
-VALUES (uuid_generate_v4(), '667fde52-d9fc-4675-82d2-c52486e93915', '6a8a96db-cce4-4aa3-85f2-dcfaf75d8fa6');
+VALUES (uuid_generate_v4(), 'cf433890-1641-4d40-bda7-9b1d5d6c26b1', '6a8a96db-cce4-4aa3-85f2-dcfaf75d8fa6');

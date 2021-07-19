@@ -71,9 +71,19 @@ public struct RacingWeekEntry: Codable, Content {
     public let trackName: String
 }
 
-public struct User: Codable, Content {
+public struct User: Codable, Content, Authenticatable {
     public let id: UUID
     public let name: String
     public let email: String
     public let pictureUrl: String?
+
+    public init(id: UUID,
+                name: String,
+                email: String,
+                pictureUrl: String?) {
+        self.id = id
+        self.name = name
+        self.email = email
+        self.pictureUrl = pictureUrl
+    }
 }

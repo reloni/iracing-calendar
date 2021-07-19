@@ -18,9 +18,10 @@ struct ApiController: RouteCollection {
         group.get("all-series", use: allRacingSeries)
         group.get("all-seasons", use: allSeasons)
         group.get("current-season", use: currentSeason)
-        group.get("favorite-series", use: favoriteSeries)
         group.get("testJwt", use: testJwt)
         group.post(["oauth", "authorize", "google"], use: authorizeWithGoogleToken)
+
+        group.grouped(UserAuthenticator()).get("favorite-series", use: favoriteSeries)
     }
 
     // func listAllSeries(req: Request) throws -> EventLoopFuture<[Serie]> {
@@ -95,8 +96,8 @@ struct ApiController: RouteCollection {
     }
 
     func favoriteSeries(req: Request) throws -> EventLoopFuture<[RacingSerie]> {
-        let userId = "667fde52-d9fc-4675-82d2-c52486e93915"
-        return DbUser.find(UUID.init(uuidString: userId), on: req.db)
+        let user = try req.auth.require() as User
+        return DbUser.find(user.id, on: req.db)
             .unwrap(or: Abort(.notFound))
             .flatMap { $0.$series.query(on: req.db).all() }
     }
