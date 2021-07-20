@@ -32,7 +32,7 @@ struct ApiController: RouteCollection {
         let uuid = try req.query.get(UUID.self, at: "uuid")
         let isFavorite = try req.query.get(Bool.self, at: "isFavorite")
         // app.logger.info("User id \(req.session.user?.user.id.uuidString ?? "")")
-        app.logger.info("Set isFavorite \(isFavorite) to \(uuid)")
+        req.logger.info("Set isFavorite \(isFavorite) to \(uuid)")
         // app.logger.info("Usdr id \(req.session.user?.user.name ?? "")")
         
         // if let index = allSeries.firstIndex(where: { $0.uuid == uuid }) {
@@ -63,7 +63,7 @@ struct ApiController: RouteCollection {
             .first()
             .flatMap { dbUser -> EventLoopFuture<DbUser> in 
                 if let dbUser = dbUser {
-                    app.logger.info("User exists")
+                    req.logger.info("User exists")
                     return AccessToken
                         .query(on: req.db)
                         .filter(\.$token, .equal, accessToken)
@@ -73,7 +73,7 @@ struct ApiController: RouteCollection {
                         .flatMap { dbUser.$tokens.create($0, on: req.db) }
                         .map { _ in dbUser }
                 } else {
-                    app.logger.info("Create new user")
+                    req.logger.info("Create new user")
                     let newUser = DbUser(name: idToken.name ?? "", email: idToken.email!, pictureUrl: idToken.picture)
                     return newUser.create(on: req.db).flatMapThrowing { 
                         try AccessToken(token: accessToken, expireAt: idToken.expires.value, user: newUser)
