@@ -33,17 +33,40 @@ struct ApiController: RouteCollection {
     // }
 
     func setFavoriteStatus(req: Request) throws -> EventLoopFuture<Response> {
-        let uuid = try req.query.get(UUID.self, at: "uuid")
-        let isFavorite = try req.query.get(Bool.self, at: "isFavorite")
-        // app.logger.info("User id \(req.session.user?.user.id.uuidString ?? "")")
-        req.logger.info("Set isFavorite \(isFavorite) to \(uuid)")
-        // app.logger.info("Usdr id \(req.session.user?.user.name ?? "")")
+        let user = try req.auth.require() as User
+        let serieUuid = try req.query.get(UUID.self, at: "uuid")
+        let newFavoriteStatus = try req.query.get(Bool.self, at: "isFavorite")
         
-        // if let index = allSeries.firstIndex(where: { $0.uuid == uuid }) {
-        //     allSeries[index].isFavorite = isFavorite
-        // }
+        let serieQuery = RacingSerie.find(serieUuid, on: req.db)
+            .unwrap(or: Abort(.notFound))
 
-        return req.eventLoop.makeSucceededFuture(.init(status: .ok))
+        let userQuery = DbUser.query(on: req.db)
+            .filter(\.$id, .equal, user.id)
+            .with(\.$series)
+            .first()
+            .unwrap(or: Abort(.notFound))
+
+        return serieQuery.and(userQuery).flatMap { serie, user -> EventLoopFuture<Response> in 
+            if user.series.contains(where: { $0.id == serie.id }) { // check if the serie is already favorite
+                if newFavoriteStatus {
+                    req.logger.info("Serie is already favorite. Do nothing")
+                    return req.eventLoop.makeSucceededFuture(.init(status: .ok))
+                } else {
+                    req.logger.info("Remove serie from favorites")
+                    return user.$series.detach(serie, on: req.db)
+                        .flatMap { req.eventLoop.makeSucceededFuture(.init(status: .ok)) }
+                }
+            } else {
+                if newFavoriteStatus {
+                    req.logger.info("Add serie to favorites")
+                    return user.$series.attach(serie, on: req.db)
+                        .flatMap { req.eventLoop.makeSucceededFuture(.init(status: .ok)) }
+                } else {
+                    req.logger.info("Serie is already not favorite. Do nothing")
+                    return req.eventLoop.makeSucceededFuture(.init(status: .ok))
+                }
+            }
+        }
     }
 
     func allRacingSeries(req: Request) throws -> EventLoopFuture<[RacingSerie]> {
