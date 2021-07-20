@@ -14,14 +14,18 @@ struct ApiController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
         let group = routes.grouped("api")
         // group.get("all-series", use: listAllSeries)
-        group.post("set-favorite-status", use: setFavoriteStatus)
+        
         group.get("all-series", use: allRacingSeries)
         group.get("all-seasons", use: allSeasons)
         group.get("current-season", use: currentSeason)
         group.get("testJwt", use: testJwt)
         group.post(["oauth", "authorize", "google"], use: authorizeWithGoogleToken)
 
-        group.grouped(UserAuthenticator()).get("favorite-series", use: favoriteSeries)
+        // Bearer
+        let bearer = group.grouped(UserAuthenticator()).grouped(User.guardMiddleware())
+        bearer.post("set-favorite-status", use: setFavoriteStatus)
+        bearer.get("favorite-series", use: favoriteSeries)
+        
     }
 
     // func listAllSeries(req: Request) throws -> EventLoopFuture<[Serie]> {
