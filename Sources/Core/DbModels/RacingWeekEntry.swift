@@ -2,24 +2,24 @@ import Fluent
 import Vapor
 import Foundation
 
-final class RacingWeekEntry: Model, Content {
-    static let schema = "weekentries"
+final public class DbRacingWeekEntry: Model, Content {
+    static public let schema = "weekentries"
 
     @ID(key: .id)
-    var id: UUID?
+    public var id: UUID?
 
     @Field(key: "trackname")
-    var trackName: String
+    public var trackName: String
 
     @Parent(key: "serieid")
-    var serie: RacingSerie
+    public var serie: DbRacingSerie
 
     // @Siblings(through: RacingWeekRacingTrackPivot.self, from: \.$season, to: \.$serie)
     // var track: [RacingSerie]
 
-    init() { }
+    public init() { }
 
-    init(id: UUID? = nil, trackName: String) {
+    public init(id: UUID? = nil, trackName: String) {
         self.id = id
         self.trackName = trackName
     }

@@ -64,7 +64,8 @@ let package = Package(
             name: "Core",
             dependencies: [
                 .product(name: "Vapor", package: "vapor"),
-                .product(name: "Leaf", package: "leaf")
+                .product(name: "Leaf", package: "leaf"),
+                .product(name: "Fluent", package: "fluent"),
             ],
             swiftSettings: [
                 // Enable better optimizations when building in Release configuration. Despite the use of

@@ -2,6 +2,12 @@ import Vapor
 import Leaf
 import Core
 
+extension Request {
+    func accessTokenHeader() -> HTTPHeaders {
+        (session.user?.token.access_token).map { ["Authorization": "Bearer \($0)"] } ?? [:]
+    }
+}
+
 struct MainController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
         routes.get(use: homeView)
@@ -32,7 +38,7 @@ struct MainController: RouteCollection {
             .init(title: "Profile", link: "home", isActive: false)
         ]
 
-        return req.client.get(ApiUri.currentSeason.url)
+        return req.client.get(ApiUri.currentSeason.url, headers: req.accessTokenHeader())
             .flatMapThrowing { try $0.content.decode(RacingSeason.self) }
             .map { SeriesViewContext.init(title: "All Series", user: req.session.user, series: $0.series, navbarItems: navbarItems) }
             .flatMap { req.view.render("all-series-view", $0) }
@@ -45,18 +51,16 @@ struct MainController: RouteCollection {
             .init(title: "Profile", link: "home", isActive: false),
         ]
 
-        return req.view.render("favorite-series-view", 
-                               SeriesViewContext.init(title: "Favorite series", user: req.session.user, series: [], navbarItems: navbarItems))
-        // return req.client.get(ApiUri.allSeries.url)
-        //     .flatMapThrowing { try $0.content.decode([Serie].self).filter { $0.isFavorite } }
-        //     .map { SeriesViewContext.init(title: "Favorite series", user: req.session.user, series: $0, navbarItems: navbarItems) }
-        //     .flatMap { req.view.render("favorite-series-view", $0) }
+        return req.client.get(ApiUri.favoriteSeries.url, headers: req.accessTokenHeader())
+            .flatMapThrowing { try $0.content.decode([RacingSerie].self) }
+            .map { SeriesViewContext.init(title: "Favorite series", user: req.session.user, series: $0, navbarItems: navbarItems) }
+            .flatMap { req.view.render("favorite-series-view", $0) }
     }
 
     func setFavoriteStatus(req: Request) throws -> EventLoopFuture<Response> {
         let uuid = try req.query.get(UUID.self, at: "uuid")
         let isFavorite = try req.query.get(Bool.self, at: "isFavorite")
-        return req.client.post(ApiUri.setFavoriteStatus.url) { req in 
+        return req.client.post(ApiUri.setFavoriteStatus.url, headers: req.accessTokenHeader()) { req in 
             try req.query.encode(["uuid":uuid.uuidString, "isFavorite": "\(isFavorite)"])
         }.encodeResponse(for: req)
     }

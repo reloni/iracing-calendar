@@ -9,6 +9,7 @@ public enum ApiUri {
     case setFavoriteStatus
     case currentSeason
     case authorizeGoogle
+    case favoriteSeries
 
     public var url: URI {
         switch self {
@@ -16,6 +17,7 @@ public enum ApiUri {
             case .currentSeason: return "\(Self.base)/api/current-season"
             case .setFavoriteStatus: return "\(Self.base)/api/set-favorite-status"
             case .authorizeGoogle: return "\(Self.base)/api/oauth/authorize/google"
+            case .favoriteSeries: return "\(Self.base)/api/favorite-series"
         }
     }
 }

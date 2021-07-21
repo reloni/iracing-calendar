@@ -2,14 +2,6 @@ import Vapor
 import Core
 import JWT
 
-var allSeries: [Serie] = [
-    .init(uuid: UUID(), name: "Porsche iRacing Cup", nextRace: "2 minutes", startDate: "11 May", length: "16 laps", track: "Hockenheimring Baden-Württemberg - Grand Prix", isFavorite: false),
-    .init(uuid: UUID(), name: "VRS GT Sprint Series", nextRace: "12 minutes", startDate: "11 May", length: "40 mins", track: "Okayama International Circuit - Full Course", isFavorite: false),
-    .init(uuid: UUID(), name: "IMSA Michelin Pilot Challenge", nextRace: "67 minutes", startDate: "11 May", length: "30 mins", track: "Mid-Ohio Sports Car Course - Full Course", isFavorite: false),
-    .init(uuid: UUID(), name: "IMSA Hagerty iRacing Series", nextRace: "112 minutes", startDate: "11 May", length: "45 mins", track: "Mid-Ohio Sports Car Course - Full Course", isFavorite: false),
-    .init(uuid: UUID(), name: "Pure Driving School European Sprint Series", nextRace: "15 minutes", startDate: "11 May", length: "60 mins", track: "Silverstone Circuit - Grand Prix", isFavorite: false)
-]
-
 struct ApiController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
         let group = routes.grouped("api")
@@ -21,10 +13,14 @@ struct ApiController: RouteCollection {
         group.get("testJwt", use: testJwt)
         group.post(["oauth", "authorize", "google"], use: authorizeWithGoogleToken)
 
-        // Bearer
-        let bearer = group.grouped(UserAuthenticator()).grouped(User.guardMiddleware())
-        bearer.post("set-favorite-status", use: setFavoriteStatus)
-        bearer.get("favorite-series", use: favoriteSeries)
+        // authorization optional
+        let authOptional = group.grouped(UserAuthenticator())
+        authOptional.get("current-season", use: currentSeason)
+
+        // autroruzation required
+        let authRequired = group.grouped(UserAuthenticator()).grouped(User.guardMiddleware())
+        authRequired.post("set-favorite-status", use: setFavoriteStatus)
+        authRequired.get("favorite-series", use: favoriteSeries)
         
     }
 
@@ -37,7 +33,7 @@ struct ApiController: RouteCollection {
         let serieUuid = try req.query.get(UUID.self, at: "uuid")
         let newFavoriteStatus = try req.query.get(Bool.self, at: "isFavorite")
         
-        let serieQuery = RacingSerie.find(serieUuid, on: req.db)
+        let serieQuery = DbRacingSerie.find(serieUuid, on: req.db)
             .unwrap(or: Abort(.notFound))
 
         let userQuery = DbUser.query(on: req.db)
@@ -69,12 +65,12 @@ struct ApiController: RouteCollection {
         }
     }
 
-    func allRacingSeries(req: Request) throws -> EventLoopFuture<[RacingSerie]> {
-        RacingSerie.query(on: req.db).all()
+    func allRacingSeries(req: Request) throws -> EventLoopFuture<[DbRacingSerie]> {
+        DbRacingSerie.query(on: req.db).all()
     }
 
-    func allSeasons(req: Request) throws -> EventLoopFuture<[RacingSeason]> {
-        RacingSeason.query(on: req.db).with(\.$series).all()
+    func allSeasons(req: Request) throws -> EventLoopFuture<[DbRacingSeason]> {
+        DbRacingSeason.query(on: req.db).with(\.$series).all()
     }
 
     func authorizeWithGoogleToken(req: Request) throws -> EventLoopFuture<DbUser> {
@@ -91,19 +87,19 @@ struct ApiController: RouteCollection {
             .flatMap { dbUser -> EventLoopFuture<DbUser> in 
                 if let dbUser = dbUser {
                     req.logger.info("User exists")
-                    return AccessToken
+                    return DbAccessToken
                         .query(on: req.db)
                         .filter(\.$token, .equal, accessToken)
                         .first()
                         .flatMap { $0?.delete(on: req.db) ?? req.eventLoop.makeSucceededFuture(()) }
-                        .flatMapThrowing { try AccessToken(token: accessToken, expireAt: idToken.expires.value, user: dbUser) }
+                        .flatMapThrowing { try DbAccessToken(token: accessToken, expireAt: idToken.expires.value, user: dbUser) }
                         .flatMap { dbUser.$tokens.create($0, on: req.db) }
                         .map { _ in dbUser }
                 } else {
                     req.logger.info("Create new user")
                     let newUser = DbUser(name: idToken.name ?? "", email: idToken.email!, pictureUrl: idToken.picture)
                     return newUser.create(on: req.db).flatMapThrowing { 
-                        try AccessToken(token: accessToken, expireAt: idToken.expires.value, user: newUser)
+                        try DbAccessToken(token: accessToken, expireAt: idToken.expires.value, user: newUser)
                     }.flatMap { newUser.$tokens.create($0, on: req.db) }
                     .map { _ in newUser }
                 }
@@ -111,22 +107,35 @@ struct ApiController: RouteCollection {
     }
 
     func currentSeason(req: Request) throws -> EventLoopFuture<Response> {
-        RacingSeason
+        let userId = (req.auth.get(User.self) as User?)?.id
+        
+        // load user favorite series if user is present
+        let favoriteSeries = userId.map {
+            DbUser
+                .find($0, on: req.db)
+                .unwrap(or: Abort(.notFound, reason: "User not found"))
+                .flatMap { user in user.$series.load(on: req.db).map { _ in user } }
+                .map { Set($0.series.map { $0.id! }) }
+        } ?? req.eventLoop.makeSucceededFuture(Set<UUID>())
+        
+        return DbRacingSeason
             .query(on: req.db)
             .filter(\.$isActive, .equal, .BooleanLiteralType(booleanLiteral: true))
             .with(\.$series)
             .with(\.$series, { $0.with(\.$weeks) })
             .first()
-            .flatMap { season in
-                season?.encodeResponse(for: req) ?? req.eventLoop.makeSucceededFuture(Response()).encodeResponse(for: req)
-            }
+            .unwrap(or: Abort(.notFound, reason: "Season not found"))
+            .and(favoriteSeries)
+            .map { dbSeason, favoriteSeries in RacingSeason.init(dbSeason, favoriteSeries: favoriteSeries) }
+            .flatMap { $0.encodeResponse(for: req) }
     }
 
     func favoriteSeries(req: Request) throws -> EventLoopFuture<[RacingSerie]> {
         let user = try req.auth.require() as User
         return DbUser.find(user.id, on: req.db)
             .unwrap(or: Abort(.notFound))
-            .flatMap { $0.$series.query(on: req.db).all() }
+            .flatMap { $0.$series.query(on: req.db).with(\.$weeks).all() }
+            .map { $0.map(RacingSerie.init) }
     }
 
     func testJwt(req: Request) -> EventLoopFuture<HTTPStatus> {

@@ -7,13 +7,13 @@ struct UserAuthenticator: BearerAuthenticator {
         bearer: BearerAuthorization,
         for request: Request
     ) -> EventLoopFuture<Void> {
-        return AccessToken
+        return DbAccessToken
             .query(on: request.db)
             .with(\.$user)
             .filter(\.$token, .equal, bearer.token)
             .first()
             .unwrap(orError: Abort(.unauthorized, reason: "Invalid access token"))
-            .flatMapThrowing { token -> AccessToken in
+            .flatMapThrowing { token -> DbAccessToken in
                 guard token.expireAt > Date() else { throw Abort(.unauthorized, reason: "Access token expired") }
                 return token
             }

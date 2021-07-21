@@ -2,33 +2,33 @@ import Fluent
 import Vapor
 import Foundation
 
-final class DbUser: Model, Content {
-    static let schema = "users"
+final public class DbUser: Model, Content {
+    static public let schema = "users"
 
     @ID(key: .id)
-    var id: UUID?
+    public var id: UUID?
 
     @Field(key: "name")
-    var name: String
+    public var name: String
 
     @Field(key: "email")
-    var email: String
+    public var email: String
 
     @Field(key: "pictureurl")
-    var pictureUrl: String?
+    public var pictureUrl: String?
 
     @Children(for: \.$user)
-    var tokens: [AccessToken]
+    public var tokens: [DbAccessToken]
 
     @Siblings(
         through: DbUserRacingSeriePivot.self,
         from: \.$user,
         to: \.$serie)
-    var series: [RacingSerie]
+    public var series: [DbRacingSerie]
 
-    init() { }
+    public init() { }
 
-    init(id: UUID? = nil, name: String, email: String, pictureUrl: String?) {
+    public init(id: UUID? = nil, name: String, email: String, pictureUrl: String?) {
         self.id = id
         self.name = name
         self.email = email

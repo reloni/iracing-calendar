@@ -14,36 +14,26 @@ public struct NavbarItem: Codable {
     }
 }
 
-public struct Serie: Codable, Content {
-    public let uuid: UUID
-    public let name: String
-    public let nextRace: String
-    public let startDate: String
-    public let length: String
-    public let track: String
-    public var isFavorite: Bool
-
-    public init(uuid: UUID,
-                name: String,
-                nextRace: String,
-                startDate: String,
-                length: String,
-                track: String,
-                isFavorite: Bool) {
-        self.uuid = uuid
-        self.name = name
-        self.nextRace = nextRace
-        self.startDate = startDate
-        self.length = length
-        self.track = track
-        self.isFavorite = isFavorite
-    }
-}
-
 public struct RacingSeason: Codable, Content {
     public let id: UUID
     public let name: String
     public let series: [RacingSerie]
+}
+
+extension RacingSeason {
+    public init(_ season: DbRacingSeason, favoriteSeries: Set<UUID>) {
+        self.id = season.id!
+        self.name = season.name
+        self.series = season.series.map {
+            RacingSerie(id: $0.id!, 
+                        name: $0.name, 
+                        homePage: $0.homePage, 
+                        logoUrl: $0.logoUrl, 
+                        weeks: $0.weeks.map(RacingWeekEntry.init), 
+                        currentWeek: $0.weeks.first.map(RacingWeekEntry.init), 
+                        isFavorite: favoriteSeries.contains($0.id!))
+        }
+    }
 }
 
 public struct RacingSerie: Codable, Content {
@@ -52,7 +42,20 @@ public struct RacingSerie: Codable, Content {
     public let homePage: String
     public let logoUrl: String
     public let weeks: [RacingWeekEntry]
-    public let currentWeek: RacingWeekEntry
+    public let currentWeek: RacingWeekEntry?
+    public let isFavorite: Bool
+}
+
+extension RacingSerie {
+    public init(_ serie: DbRacingSerie) {
+        self.id = serie.id!
+        self.name = serie.name
+        self.homePage = serie.homePage
+        self.logoUrl = serie.logoUrl
+        self.weeks = serie.weeks.map(RacingWeekEntry.init)
+        self.currentWeek = serie.weeks.first.map(RacingWeekEntry.init)
+        self.isFavorite = true
+    }
 
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -62,13 +65,21 @@ public struct RacingSerie: Codable, Content {
         logoUrl = try container.decode(String.self, forKey: .logoUrl)
         weeks = try container.decode([RacingWeekEntry].self, forKey: .weeks)
 
-        currentWeek = weeks[0]
+        currentWeek = try container.decodeIfPresent(RacingWeekEntry.self, forKey: .currentWeek)
+        isFavorite = try container.decode(Bool.self, forKey: .isFavorite)
     }
 }
 
 public struct RacingWeekEntry: Codable, Content {
     public let id: UUID
     public let trackName: String
+}
+
+extension RacingWeekEntry {
+    init(_ week: DbRacingWeekEntry) {
+        self.id = week.id!
+        self.trackName = week.trackName
+    }
 }
 
 public struct User: Codable, Content, Authenticatable {
