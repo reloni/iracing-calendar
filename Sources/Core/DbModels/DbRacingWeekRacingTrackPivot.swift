@@ -1,7 +1,7 @@
 import Fluent
 import Foundation
 
-// final class RacingWeekRacingTrackPivot: Model {
+// final class DbRacingWeekRacingTrackPivot: Model {
 //     static let schema = "racingweekracingtrackpivot"
     
 //     @ID
