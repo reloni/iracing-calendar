@@ -130,11 +130,12 @@ struct ApiController: RouteCollection {
             .flatMap { $0.encodeResponse(for: req) }
     }
 
-    func favoriteSeries(req: Request) throws -> EventLoopFuture<[DbRacingSerie]> {
+    func favoriteSeries(req: Request) throws -> EventLoopFuture<[RacingSerie]> {
         let user = try req.auth.require() as User
         return DbUser.find(user.id, on: req.db)
             .unwrap(or: Abort(.notFound))
-            .flatMap { $0.$series.query(on: req.db).all() }
+            .flatMap { $0.$series.query(on: req.db).with(\.$weeks).all() }
+            .map { $0.map(RacingSerie.init) }
     }
 
     func testJwt(req: Request) -> EventLoopFuture<HTTPStatus> {

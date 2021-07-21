@@ -47,6 +47,16 @@ public struct RacingSerie: Codable, Content {
 }
 
 extension RacingSerie {
+    public init(_ serie: DbRacingSerie) {
+        self.id = serie.id!
+        self.name = serie.name
+        self.homePage = serie.homePage
+        self.logoUrl = serie.logoUrl
+        self.weeks = serie.weeks.map(RacingWeekEntry.init)
+        self.currentWeek = serie.weeks.first.map(RacingWeekEntry.init)
+        self.isFavorite = true
+    }
+
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         id = try container.decode(UUID.self, forKey: .id)
