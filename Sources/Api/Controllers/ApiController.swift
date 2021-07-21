@@ -1,15 +1,6 @@
 import Vapor
 import Core
 import JWT
-import FluentPostgresDriver
-
-extension RacingSeason {
-    // init(_ season: DbRacingSeason) {
-        // self.id = season.id!
-        // self.name = season.name
-        // self.series = []
-    // }
-}
 
 struct ApiController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
@@ -112,19 +103,12 @@ struct ApiController: RouteCollection {
     }
 
     func currentSeason(req: Request) throws -> EventLoopFuture<Response> {
-        // if let user = req.auth.get(User.self) {
         let uuid = UUID(uuidString: "cf433890-1641-4d40-bda7-9b1d5d6c26b1")!
-        let test = DbUser
+        let favoriteSeries = DbUser
             .find(uuid, on: req.db)
             .unwrap(or: Abort(.notFound))
             .flatMap { user in user.$series.load(on: req.db).map { _ in user } }
-            .flatMap { u -> EventLoopFuture<Void> in 
-                let ids = Set(u.series.map { $0.id! })
-                req.logger.info("Favorites")
-                req.logger.info("\(ids)")
-                return req.eventLoop.makeSucceededFuture(())
-            }
-        // }
+            .map { Set($0.series.map { $0.id! }) }
         
         return DbRacingSeason
             .query(on: req.db)
@@ -132,9 +116,10 @@ struct ApiController: RouteCollection {
             .with(\.$series)
             .with(\.$series, { $0.with(\.$weeks) })
             .first()
-            .flatMap { season in
-                season?.encodeResponse(for: req) ?? req.eventLoop.makeSucceededFuture(Response()).encodeResponse(for: req)
-            }.and(test).map { $0.0 }
+            .unwrap(or: Abort(.notFound))
+            .and(favoriteSeries)
+            .map { dbSeason, favoriteSeries in RacingSeason.init(dbSeason, favoriteSeries: favoriteSeries) }
+            .flatMap { $0.encodeResponse(for: req) }
     }
 
     func favoriteSeries(req: Request) throws -> EventLoopFuture<[DbRacingSerie]> {
