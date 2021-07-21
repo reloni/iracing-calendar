@@ -2,6 +2,12 @@ import Vapor
 import Leaf
 import Core
 
+extension Request {
+    func accessTokenHeader() -> HTTPHeaders {
+        (session.user?.token.access_token).map { ["Authorization": "Bearer \($0)"] } ?? [:]
+    }
+}
+
 struct MainController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
         routes.get(use: homeView)
@@ -32,7 +38,7 @@ struct MainController: RouteCollection {
             .init(title: "Profile", link: "home", isActive: false)
         ]
 
-        return req.client.get(ApiUri.currentSeason.url)
+        return req.client.get(ApiUri.currentSeason.url, headers: req.accessTokenHeader())
             .flatMapThrowing { try $0.content.decode(RacingSeason.self) }
             .map { SeriesViewContext.init(title: "All Series", user: req.session.user, series: $0.series, navbarItems: navbarItems) }
             .flatMap { req.view.render("all-series-view", $0) }
