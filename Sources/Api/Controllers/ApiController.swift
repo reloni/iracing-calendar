@@ -13,10 +13,14 @@ struct ApiController: RouteCollection {
         group.get("testJwt", use: testJwt)
         group.post(["oauth", "authorize", "google"], use: authorizeWithGoogleToken)
 
-        // Bearer
-        let bearer = group.grouped(UserAuthenticator()).grouped(User.guardMiddleware())
-        bearer.post("set-favorite-status", use: setFavoriteStatus)
-        bearer.get("favorite-series", use: favoriteSeries)
+        // authorization optional
+        let authOptional = group.grouped(UserAuthenticator())
+        authOptional.get("current-season", use: currentSeason)
+
+        // autroruzation required
+        let authRequired = group.grouped(UserAuthenticator()).grouped(User.guardMiddleware())
+        authRequired.post("set-favorite-status", use: setFavoriteStatus)
+        authRequired.get("favorite-series", use: favoriteSeries)
         
     }
 
@@ -103,12 +107,16 @@ struct ApiController: RouteCollection {
     }
 
     func currentSeason(req: Request) throws -> EventLoopFuture<Response> {
-        let uuid = UUID(uuidString: "cf433890-1641-4d40-bda7-9b1d5d6c26b1")!
-        let favoriteSeries = DbUser
-            .find(uuid, on: req.db)
-            .unwrap(or: Abort(.notFound))
-            .flatMap { user in user.$series.load(on: req.db).map { _ in user } }
-            .map { Set($0.series.map { $0.id! }) }
+        let userId = (req.auth.get(User.self) as User?)?.id
+        
+        // load user favorite series if user is present
+        let favoriteSeries = userId.map {
+            DbUser
+                .find($0, on: req.db)
+                .unwrap(or: Abort(.notFound, reason: "User not found"))
+                .flatMap { user in user.$series.load(on: req.db).map { _ in user } }
+                .map { Set($0.series.map { $0.id! }) }
+        } ?? req.eventLoop.makeSucceededFuture(Set<UUID>())
         
         return DbRacingSeason
             .query(on: req.db)
@@ -116,7 +124,7 @@ struct ApiController: RouteCollection {
             .with(\.$series)
             .with(\.$series, { $0.with(\.$weeks) })
             .first()
-            .unwrap(or: Abort(.notFound))
+            .unwrap(or: Abort(.notFound, reason: "Season not found"))
             .and(favoriteSeries)
             .map { dbSeason, favoriteSeries in RacingSeason.init(dbSeason, favoriteSeries: favoriteSeries) }
             .flatMap { $0.encodeResponse(for: req) }
