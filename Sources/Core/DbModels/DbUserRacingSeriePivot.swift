@@ -1,21 +1,21 @@
 import Fluent
 import Foundation
 
-final class DbUserRacingSeriePivot: Model {
-    static let schema = "userseriepivot"
+final public  class DbUserRacingSeriePivot: Model {
+    static public let schema = "userseriepivot"
     
     @ID
-    var id: UUID?
+    public var id: UUID?
     
     @Parent(key: "userid")
-    var user: DbUser
+    public var user: DbUser
     
     @Parent(key: "serieid")
-    var serie: DbRacingSerie
+    public var serie: DbRacingSerie
     
-    init() {}
+    public init() {}
     
-    init(
+    public init(
         id: UUID? = nil,
         user: DbRacingSeason,
         serie: DbRacingSerie

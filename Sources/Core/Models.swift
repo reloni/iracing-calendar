@@ -27,6 +27,7 @@ public struct RacingSerie: Codable, Content {
     public let logoUrl: String
     public let weeks: [RacingWeekEntry]
     public let currentWeek: RacingWeekEntry
+    // public let isFavorite: Bool
 
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
