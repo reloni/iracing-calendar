@@ -2,7 +2,7 @@ import Fluent
 import Vapor
 import Foundation
 
-final class RacingSerie: Model, Content {
+final class DbRacingSerie: Model, Content {
     static let schema = "series"
 
     @ID(key: .id)
@@ -18,14 +18,14 @@ final class RacingSerie: Model, Content {
     var logoUrl: String
 
     @Parent(key: "seasonid")
-    var season: RacingSeason
+    var season: DbRacingSeason
 
     @Children(for: \.$serie)
-    var weeks: [RacingWeekEntry]
+    var weeks: [DbRacingWeekEntry]
 
     init() { }
 
-    init(id: UUID? = nil, season: RacingSeason, name: String, homePage: String, logoUrl: String) throws {
+    init(id: UUID? = nil, season: DbRacingSeason, name: String, homePage: String, logoUrl: String) throws {
         self.id = id
         self.$season.id = try season.requireID()
         self.name = name

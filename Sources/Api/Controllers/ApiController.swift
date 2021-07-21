@@ -37,7 +37,7 @@ struct ApiController: RouteCollection {
         let serieUuid = try req.query.get(UUID.self, at: "uuid")
         let newFavoriteStatus = try req.query.get(Bool.self, at: "isFavorite")
         
-        let serieQuery = RacingSerie.find(serieUuid, on: req.db)
+        let serieQuery = DbRacingSerie.find(serieUuid, on: req.db)
             .unwrap(or: Abort(.notFound))
 
         let userQuery = DbUser.query(on: req.db)
@@ -69,12 +69,12 @@ struct ApiController: RouteCollection {
         }
     }
 
-    func allRacingSeries(req: Request) throws -> EventLoopFuture<[RacingSerie]> {
-        RacingSerie.query(on: req.db).all()
+    func allRacingSeries(req: Request) throws -> EventLoopFuture<[DbRacingSerie]> {
+        DbRacingSerie.query(on: req.db).all()
     }
 
-    func allSeasons(req: Request) throws -> EventLoopFuture<[RacingSeason]> {
-        RacingSeason.query(on: req.db).with(\.$series).all()
+    func allSeasons(req: Request) throws -> EventLoopFuture<[DbRacingSeason]> {
+        DbRacingSeason.query(on: req.db).with(\.$series).all()
     }
 
     func authorizeWithGoogleToken(req: Request) throws -> EventLoopFuture<DbUser> {
@@ -91,19 +91,19 @@ struct ApiController: RouteCollection {
             .flatMap { dbUser -> EventLoopFuture<DbUser> in 
                 if let dbUser = dbUser {
                     req.logger.info("User exists")
-                    return AccessToken
+                    return DbAccessToken
                         .query(on: req.db)
                         .filter(\.$token, .equal, accessToken)
                         .first()
                         .flatMap { $0?.delete(on: req.db) ?? req.eventLoop.makeSucceededFuture(()) }
-                        .flatMapThrowing { try AccessToken(token: accessToken, expireAt: idToken.expires.value, user: dbUser) }
+                        .flatMapThrowing { try DbAccessToken(token: accessToken, expireAt: idToken.expires.value, user: dbUser) }
                         .flatMap { dbUser.$tokens.create($0, on: req.db) }
                         .map { _ in dbUser }
                 } else {
                     req.logger.info("Create new user")
                     let newUser = DbUser(name: idToken.name ?? "", email: idToken.email!, pictureUrl: idToken.picture)
                     return newUser.create(on: req.db).flatMapThrowing { 
-                        try AccessToken(token: accessToken, expireAt: idToken.expires.value, user: newUser)
+                        try DbAccessToken(token: accessToken, expireAt: idToken.expires.value, user: newUser)
                     }.flatMap { newUser.$tokens.create($0, on: req.db) }
                     .map { _ in newUser }
                 }
@@ -111,7 +111,7 @@ struct ApiController: RouteCollection {
     }
 
     func currentSeason(req: Request) throws -> EventLoopFuture<Response> {
-        RacingSeason
+        DbRacingSeason
             .query(on: req.db)
             .filter(\.$isActive, .equal, .BooleanLiteralType(booleanLiteral: true))
             .with(\.$series)
@@ -122,7 +122,7 @@ struct ApiController: RouteCollection {
             }
     }
 
-    func favoriteSeries(req: Request) throws -> EventLoopFuture<[RacingSerie]> {
+    func favoriteSeries(req: Request) throws -> EventLoopFuture<[DbRacingSerie]> {
         let user = try req.auth.require() as User
         return DbUser.find(user.id, on: req.db)
             .unwrap(or: Abort(.notFound))

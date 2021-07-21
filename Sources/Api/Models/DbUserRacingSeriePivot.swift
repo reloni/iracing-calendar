@@ -11,14 +11,14 @@ final class DbUserRacingSeriePivot: Model {
     var user: DbUser
     
     @Parent(key: "serieid")
-    var serie: RacingSerie
+    var serie: DbRacingSerie
     
     init() {}
     
     init(
         id: UUID? = nil,
-        user: RacingSeason,
-        serie: RacingSerie
+        user: DbRacingSeason,
+        serie: DbRacingSerie
     ) throws {
         self.id = id
         self.$user.id = try user.requireID()

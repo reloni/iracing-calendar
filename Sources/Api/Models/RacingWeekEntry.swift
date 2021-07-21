@@ -2,7 +2,7 @@ import Fluent
 import Vapor
 import Foundation
 
-final class RacingWeekEntry: Model, Content {
+final class DbRacingWeekEntry: Model, Content {
     static let schema = "weekentries"
 
     @ID(key: .id)
@@ -12,7 +12,7 @@ final class RacingWeekEntry: Model, Content {
     var trackName: String
 
     @Parent(key: "serieid")
-    var serie: RacingSerie
+    var serie: DbRacingSerie
 
     // @Siblings(through: RacingWeekRacingTrackPivot.self, from: \.$season, to: \.$serie)
     // var track: [RacingSerie]

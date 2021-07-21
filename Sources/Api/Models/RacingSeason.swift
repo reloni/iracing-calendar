@@ -2,7 +2,7 @@ import Fluent
 import Vapor
 import Foundation
 
-final class RacingSeason: Model, Content {
+final class DbRacingSeason: Model, Content {
     static let schema = "seasons"
 
     @ID(key: .id)
@@ -15,7 +15,7 @@ final class RacingSeason: Model, Content {
     var isActive: Bool
 
     @Children(for: \.$season)
-    var series: [RacingSerie]
+    var series: [DbRacingSerie]
 
     init() { }
 

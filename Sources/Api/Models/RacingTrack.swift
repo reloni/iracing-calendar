@@ -2,7 +2,7 @@ import Fluent
 import Vapor
 import Foundation
 
-final class RacingTrack: Model, Content {
+final class DbRacingTrack: Model, Content {
     static let schema = "tracks"
 
     @ID(key: .id)

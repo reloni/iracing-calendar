@@ -2,7 +2,7 @@ import Fluent
 import Vapor
 import Foundation
 
-final class AccessToken: Model, Content {
+final class DbAccessToken: Model, Content {
     static let schema = "accesstokens"
 
     @ID(key: .id)

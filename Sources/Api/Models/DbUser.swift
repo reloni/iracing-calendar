@@ -18,13 +18,13 @@ final class DbUser: Model, Content {
     var pictureUrl: String?
 
     @Children(for: \.$user)
-    var tokens: [AccessToken]
+    var tokens: [DbAccessToken]
 
     @Siblings(
         through: DbUserRacingSeriePivot.self,
         from: \.$user,
         to: \.$serie)
-    var series: [RacingSerie]
+    var series: [DbRacingSerie]
 
     init() { }
 
