@@ -1,4 +1,4 @@
-public struct GoogleTokenData: Codable {
+public struct GoogleToken: Codable {
     public let access_token: String
     public let expires_in: Int
     public let refresh_token: String

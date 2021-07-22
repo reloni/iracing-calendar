@@ -10,8 +10,8 @@ public struct GoogleAuthController: RouteCollection {
     }
 
     func loginWithGoogle(request: Request) throws -> EventLoopFuture<Response> {
-        let callbackUrl = Environment.EnvVar.callbackUrl.value!
-        let clientId = Environment.EnvVar.clientId.value!
+        let callbackUrl = Environment.frontend.cases.googleCallbackUrl.value!
+        let clientId = Environment.frontend.cases.googleClientId.value!
 
         var components = URLComponents()
         components.scheme = "https"
@@ -33,17 +33,17 @@ public struct GoogleAuthController: RouteCollection {
     func handleGoogleOauth(request: Request) throws -> EventLoopFuture<Response> {
         let code = try request.query.get(String.self, at: "code")
         
-        return request.client.post(URI(string: Environment.EnvVar.tokenExchangeUrl.value!), 
+        return request.client.post(URI(string: Environment.frontend.cases.googleTokenExchangeUrl.value!), 
             headers: ["Content-Type": "application/x-www-form-urlencoded"]) { req in 
             try req.content.encode([
                 "code": code,
-                "client_id": Environment.EnvVar.clientId.value!,
-                "client_secret": Environment.EnvVar.clientSecret.value!,
-                "redirect_uri": Environment.EnvVar.callbackUrl.value!,
+                "client_id": Environment.frontend.cases.googleClientId.value!,
+                "client_secret": Environment.frontend.cases.googleClientSecret.value!,
+                "redirect_uri": Environment.frontend.cases.googleCallbackUrl.value!,
                 "grant_type": "authorization_code"
                 ], as: .urlEncodedForm)
         }.flatMapThrowing { res in
-            try res.content.decode(GoogleTokenData.self)
+            try res.content.decode(GoogleToken.self)
         }.flatMap { token in
             GoogleAuthController.authorize(on: request, with: token)
         }.flatMap { user, token in 
@@ -62,7 +62,7 @@ public struct GoogleAuthController: RouteCollection {
         }
     }
 
-    static func authorize(on request: Request, with token: GoogleTokenData) -> EventLoopFuture<(User, GoogleTokenData)> {
+    static func authorize(on request: Request, with token: GoogleToken) -> EventLoopFuture<(User, GoogleToken)> {
         return request.client
             .post(ApiUri.authorizeGoogle.url) { req in  try req.content.encode(token, as: .json) }
             .flatMapThrowing { res in

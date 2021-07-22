@@ -1,6 +1,7 @@
 import Vapor
 import Core
 import JWT
+import Core
 
 struct ApiController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
@@ -9,7 +10,6 @@ struct ApiController: RouteCollection {
         
         group.get("all-series", use: allRacingSeries)
         group.get("all-seasons", use: allSeasons)
-        group.get("current-season", use: currentSeason)
         group.get("testJwt", use: testJwt)
         group.post(["oauth", "authorize", "google"], use: authorizeWithGoogleToken)
 
@@ -74,7 +74,7 @@ struct ApiController: RouteCollection {
     }
 
     func authorizeWithGoogleToken(req: Request) throws -> EventLoopFuture<DbUser> {
-        let token = try req.content.decode(GoogleTokenData.self)
+        let token = try req.content.decode(GoogleToken.self)
         return req.jwt.google.verify(token.id_token)
             .flatMap { Self.updateOrCreateUser(for: req, with: $0, accessToken: token.access_token) }
     }
