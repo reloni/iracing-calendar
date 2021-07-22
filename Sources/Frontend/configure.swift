@@ -13,6 +13,8 @@ public func configure(_ app: Application) throws {
     app.leaf.cache.isEnabled = app.environment.isRelease
     app.views.use(.leaf)
 
+    StackTrace.isCaptureEnabled = true
+
     // register routes
     try routes(app)
 }
