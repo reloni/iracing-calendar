@@ -6,18 +6,14 @@ struct ApiController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
         let group = routes.grouped("api")
         
-        group.get("testJwt", use: testJwt)
-        // group.post(["oauth", "authorize", "google"], use: authorizeWithGoogleToken)
-
         // authorization optional
         let authOptional = group.grouped(UserAuthenticator())
         authOptional.get("current-season", use: currentSeason)
 
         // autroruzation required
         let authRequired = group.grouped(UserAuthenticator()).grouped(User.guardMiddleware())
-        authRequired.post("set-favorite-status", use: setFavoriteStatus)
         authRequired.get("favorite-series", use: favoriteSeries)
-        
+        authRequired.post("set-favorite-status", use: setFavoriteStatus)
     }
 
     func setFavoriteStatus(req: Request) throws -> EventLoopFuture<Response> {
@@ -87,12 +83,5 @@ struct ApiController: RouteCollection {
             .unwrap(or: Abort(.notFound))
             .flatMap { $0.$series.query(on: req.db).with(\.$weeks).all() }
             .map { $0.map(RacingSerie.init) }
-    }
-
-    func testJwt(req: Request) -> EventLoopFuture<HTTPStatus> {
-        req.jwt.google.verify().map { token in
-            print(token) // GoogleIdentityToken
-            return .ok
-        }
     }
 }
