@@ -16,8 +16,9 @@ public enum ApiUri {
             case .allSeries: return "\(Self.base)/api/all-series"
             case .currentSeason: return "\(Self.base)/api/current-season"
             case .setFavoriteStatus: return "\(Self.base)/api/set-favorite-status"
-            case .authorizeGoogle: return "\(Self.base)/api/oauth/authorize/google"
             case .favoriteSeries: return "\(Self.base)/api/favorite-series"
+
+            case .authorizeGoogle: return "\(Self.base)/oauth/authorize/google"
         }
     }
 }

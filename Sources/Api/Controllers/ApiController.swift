@@ -1,17 +1,13 @@
 import Vapor
 import Core
 import JWT
-import Core
 
 struct ApiController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
         let group = routes.grouped("api")
-        // group.get("all-series", use: listAllSeries)
         
-        group.get("all-series", use: allRacingSeries)
-        group.get("all-seasons", use: allSeasons)
         group.get("testJwt", use: testJwt)
-        group.post(["oauth", "authorize", "google"], use: authorizeWithGoogleToken)
+        // group.post(["oauth", "authorize", "google"], use: authorizeWithGoogleToken)
 
         // authorization optional
         let authOptional = group.grouped(UserAuthenticator())
@@ -23,10 +19,6 @@ struct ApiController: RouteCollection {
         authRequired.get("favorite-series", use: favoriteSeries)
         
     }
-
-    // func listAllSeries(req: Request) throws -> EventLoopFuture<[Serie]> {
-    //     return req.eventLoop.makeSucceededFuture(allSeries)
-    // }
 
     func setFavoriteStatus(req: Request) throws -> EventLoopFuture<Response> {
         let user = try req.auth.require() as User
@@ -63,47 +55,6 @@ struct ApiController: RouteCollection {
                 }
             }
         }
-    }
-
-    func allRacingSeries(req: Request) throws -> EventLoopFuture<[DbRacingSerie]> {
-        DbRacingSerie.query(on: req.db).all()
-    }
-
-    func allSeasons(req: Request) throws -> EventLoopFuture<[DbRacingSeason]> {
-        DbRacingSeason.query(on: req.db).with(\.$series).all()
-    }
-
-    func authorizeWithGoogleToken(req: Request) throws -> EventLoopFuture<DbUser> {
-        let token = try req.content.decode(GoogleToken.self)
-        return req.jwt.google.verify(token.id_token)
-            .flatMap { Self.updateOrCreateUser(for: req, with: $0, accessToken: token.access_token) }
-    }
-
-    static func updateOrCreateUser(for req: Request, with idToken: GoogleIdentityToken, accessToken: String) -> EventLoopFuture<DbUser> {
-        return DbUser
-            .query(on: req.db)
-            .filter(\.$email, .equal, idToken.email!)
-            .first()
-            .flatMap { dbUser -> EventLoopFuture<DbUser> in 
-                if let dbUser = dbUser {
-                    req.logger.info("User exists")
-                    return DbAccessToken
-                        .query(on: req.db)
-                        .filter(\.$token, .equal, accessToken)
-                        .first()
-                        .flatMap { $0?.delete(on: req.db) ?? req.eventLoop.makeSucceededFuture(()) }
-                        .flatMapThrowing { try DbAccessToken(token: accessToken, expireAt: idToken.expires.value, user: dbUser) }
-                        .flatMap { dbUser.$tokens.create($0, on: req.db) }
-                        .map { _ in dbUser }
-                } else {
-                    req.logger.info("Create new user")
-                    let newUser = DbUser(name: idToken.name ?? "", email: idToken.email!, pictureUrl: idToken.picture)
-                    return newUser.create(on: req.db).flatMapThrowing { 
-                        try DbAccessToken(token: accessToken, expireAt: idToken.expires.value, user: newUser)
-                    }.flatMap { newUser.$tokens.create($0, on: req.db) }
-                    .map { _ in newUser }
-                }
-            }
     }
 
     func currentSeason(req: Request) throws -> EventLoopFuture<Response> {

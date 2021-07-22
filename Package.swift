@@ -37,6 +37,7 @@ let package = Package(
                 .product(name: "Fluent", package: "fluent"),
                 .product(name: "FluentPostgresDriver", package: "fluent-postgres-driver"),
                 .product(name: "JWT", package: "jwt"),
+                .target(name: "GoogleAuth"),
                 .target(name: "Core")
             ],
             swiftSettings: [
@@ -51,6 +52,8 @@ let package = Package(
             dependencies: [
                 .product(name: "Vapor", package: "vapor"),
                 .product(name: "Leaf", package: "leaf"),
+                .product(name: "Fluent", package: "fluent"),
+                .product(name: "JWT", package: "jwt"),
                 .target(name: "Core")
             ],
             swiftSettings: [

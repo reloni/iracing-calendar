@@ -1,7 +1,7 @@
 import Vapor
 import Core
 
-public struct GoogleAuthController: RouteCollection {
+public struct GoogleAuthFrontendController: RouteCollection {
     public init() { }
     
     public func boot(routes: RoutesBuilder) throws {
@@ -45,19 +45,19 @@ public struct GoogleAuthController: RouteCollection {
         }.flatMapThrowing { res in
             try res.content.decode(GoogleToken.self)
         }.flatMap { token in
-            GoogleAuthController.authorize(on: request, with: token)
+            Self.authorize(on: request, with: token)
         }.flatMap { user, token in 
             request.session.user = SessionUser(user: user, token: token)
             
             let response = request.redirect(to: "/")
-            response.cookies["token"] = 
-                HTTPCookies.Value(
-                    string: token.access_token, 
-                    maxAge: 60,
-                    isSecure: false, 
-                    isHTTPOnly: true, 
-                    sameSite: .lax
-                )
+            // response.cookies["token"] = 
+            //     HTTPCookies.Value(
+            //         string: token.access_token, 
+            //         maxAge: 60,
+            //         isSecure: false, 
+            //         isHTTPOnly: true, 
+            //         sameSite: .lax
+            //     )
             return request.eventLoop.future(response)
         }
     }
