@@ -39,12 +39,13 @@ struct MainController: RouteCollection {
         ]
 
         return req.client.get(ApiUri.currentSeason.url, headers: req.accessTokenHeader())
+            .filterHttpError()
             .flatMapThrowing { try $0.content.decode(RacingSeason.self) }
             .map { SeriesViewContext.init(title: "All Series", user: req.session.user, series: $0.series, navbarItems: navbarItems) }
             .flatMap { req.view.render("all-series-view", $0) }
     }
 
-    func favoriteSeriesView(req: Request) throws -> EventLoopFuture<View> {
+    func favoriteSeriesView(req: Request) throws -> EventLoopFuture<Response> {
         let navbarItems: [NavbarItem] = [
             .init(title: "Favorites", link: "favorite-series", isActive: true),
             .init(title: "All series", link: "all-series", isActive: false),
@@ -52,9 +53,11 @@ struct MainController: RouteCollection {
         ]
 
         return req.client.get(ApiUri.favoriteSeries.url, headers: req.accessTokenHeader())
+            .filterHttpError()
             .flatMapThrowing { try $0.content.decode([RacingSerie].self) }
             .map { SeriesViewContext.init(title: "Favorite series", user: req.session.user, series: $0, navbarItems: navbarItems) }
             .flatMap { req.view.render("favorite-series-view", $0) }
+            .encodeResponse(for: req)
     }
 
     func setFavoriteStatus(req: Request) throws -> EventLoopFuture<Response> {
@@ -62,6 +65,8 @@ struct MainController: RouteCollection {
         let isFavorite = try req.query.get(Bool.self, at: "isFavorite")
         return req.client.post(ApiUri.setFavoriteStatus.url, headers: req.accessTokenHeader()) { req in 
             try req.query.encode(["uuid":uuid.uuidString, "isFavorite": "\(isFavorite)"])
-        }.encodeResponse(for: req)
+        }
+        .filterHttpError()
+        .encodeResponse(for: req)
     }
 }

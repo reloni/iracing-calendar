@@ -80,7 +80,7 @@ struct ApiController: RouteCollection {
     func favoriteSeries(req: Request) throws -> EventLoopFuture<[RacingSerie]> {
         let user = try req.auth.require() as User
         return DbUser.find(user.id, on: req.db)
-            .unwrap(or: Abort(.notFound))
+            .unwrap(or: Abort(.notFound, reason: "User not found"))
             .flatMap { $0.$series.query(on: req.db).with(\.$weeks).all() }
             .map { $0.map(RacingSerie.init) }
     }
