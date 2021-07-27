@@ -3,8 +3,12 @@ import Leaf
 import Core
 
 extension Request {
-    func accessTokenHeader() -> HTTPHeaders {
-        (session.user?.token.access_token).map { ["Authorization": "Bearer \($0)"] } ?? [:]
+    var accessTokenHeader: (String, String)? {
+        (session.user?.token.access_token).map { ("Authorization", "Bearer \($0)") }
+    }
+
+    func createHeaders(_ headers: [(String, String)]) -> HTTPHeaders {
+        HTTPHeaders(headers + [accessTokenHeader].compactMap { $0 })
     }
 }
 
@@ -23,7 +27,7 @@ struct MainController: RouteCollection {
             title: "All series",
             user: req.session.user,
             navbarItems: [
-                    .init(title: "Favorites", link: "favorite-series", isActive: false),
+                    .init(title: "Favorites", link: "favorite-series", isActive: false), 
                     .init(title: "All series", link: "all-series", isActive: false),
                     .init(title: "Profile", link: "home", isActive: false),
                 ]
@@ -38,7 +42,9 @@ struct MainController: RouteCollection {
             .init(title: "Profile", link: "home", isActive: false)
         ]
 
-        return req.client.get(ApiUri.currentSeason.url, headers: req.accessTokenHeader())
+        
+
+        return req.client.get(ApiUri.currentSeason.url, headers: req.createHeaders([]))
             .filterHttpError()
             .flatMapThrowing { try $0.content.decode(RacingSeason.self) }
             .map { SeriesViewContext.init(title: "All Series", user: req.session.user, series: $0.series, navbarItems: navbarItems) }
@@ -52,7 +58,7 @@ struct MainController: RouteCollection {
             .init(title: "Profile", link: "home", isActive: false),
         ]
 
-        return req.client.get(ApiUri.favoriteSeries.url, headers: req.accessTokenHeader())
+        return req.client.get(ApiUri.favoriteSeries.url, headers: req.createHeaders([]))
             .filterHttpError()
             .flatMapThrowing { try $0.content.decode([RacingSerie].self) }
             .map { SeriesViewContext.init(title: "Favorite series", user: req.session.user, series: $0, navbarItems: navbarItems) }
@@ -63,7 +69,7 @@ struct MainController: RouteCollection {
     func setFavoriteStatus(req: Request) throws -> EventLoopFuture<Response> {
         let uuid = try req.query.get(UUID.self, at: "uuid")
         let isFavorite = try req.query.get(Bool.self, at: "isFavorite")
-        return req.client.post(ApiUri.setFavoriteStatus.url, headers: req.accessTokenHeader()) { req in 
+        return req.client.post(ApiUri.setFavoriteStatus.url, headers: req.createHeaders([])) { req in 
             try req.query.encode(["uuid":uuid.uuidString, "isFavorite": "\(isFavorite)"])
         }
         .filterHttpError()
