@@ -8,68 +8,6 @@ extension Request {
     }
 }
 
-extension ClientResponse {
-    var isSuccess: Bool {
-        200..<300 ~= status.code
-    }
-}
-
-struct FrontendError: DebuggableError {
-    struct ErrorResponse: Codable {
-        let error: Bool
-        let reason: String
-    }
-
-    var identifier: String {
-        return UUID().uuidString
-    }
-
-    var reason: String {
-        "HttpCode: \(httpCode). \(errorResponse?.reason ?? "Unknown")"
-    }
-
-    var source: ErrorSource?
-    var stackTrace: StackTrace?
-
-    private let httpCode: UInt
-    private let errorResponse: ErrorResponse?
-
-    init(
-        _ errorResponse: ErrorResponse?,
-        httpCode: UInt,
-        file: String = #file,
-        function: String = #function,
-        line: UInt = #line,
-        column: UInt = #column,
-        stackTrace: StackTrace? = .capture()
-    ) {
-        self.errorResponse = errorResponse
-        self.httpCode = httpCode
-
-        self.source = .init(
-            file: file,
-            function: function,
-            line: line,
-            column: column
-        )
-        self.stackTrace = stackTrace
-    }
-}
-
-extension EventLoopFuture where Value == ClientResponse {  
-    func filterHttpError() -> EventLoopFuture<Value> {
-        flatMap { response in
-            if response.isSuccess {
-                return self.eventLoop.makeSucceededFuture(response)
-            } else {
-                let error =  FrontendError.init(try? response.content.decode(FrontendError.ErrorResponse.self), 
-                                                httpCode: response.status.code)
-                return self.eventLoop.makeCompletedFuture(.failure(error))
-            }
-        }
-    }
-}
-
 struct MainController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
         routes.get(use: homeView)
@@ -101,6 +39,7 @@ struct MainController: RouteCollection {
         ]
 
         return req.client.get(ApiUri.currentSeason.url, headers: req.accessTokenHeader())
+            .filterHttpError()
             .flatMapThrowing { try $0.content.decode(RacingSeason.self) }
             .map { SeriesViewContext.init(title: "All Series", user: req.session.user, series: $0.series, navbarItems: navbarItems) }
             .flatMap { req.view.render("all-series-view", $0) }
@@ -126,6 +65,8 @@ struct MainController: RouteCollection {
         let isFavorite = try req.query.get(Bool.self, at: "isFavorite")
         return req.client.post(ApiUri.setFavoriteStatus.url, headers: req.accessTokenHeader()) { req in 
             try req.query.encode(["uuid":uuid.uuidString, "isFavorite": "\(isFavorite)"])
-        }.encodeResponse(for: req)
+        }
+        .filterHttpError()
+        .encodeResponse(for: req)
     }
 }
