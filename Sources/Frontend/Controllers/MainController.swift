@@ -2,16 +2,6 @@ import Vapor
 import Leaf
 import Core
 
-extension Request {
-    var accessTokenHeader: (String, String)? {
-        (session.user?.token.access_token).map { ("Authorization", "Bearer \($0)") }
-    }
-
-    func createHeaders(_ headers: [(String, String)]) -> HTTPHeaders {
-        HTTPHeaders(headers + [accessTokenHeader].compactMap { $0 })
-    }
-}
-
 struct MainController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
         routes.get(use: homeView)
