@@ -1,16 +1,38 @@
 import Vapor
 
 public struct NavbarItem: Codable {
+    public enum Description: String, Codable {
+        case favorites
+        case allSeries
+        case profile
+
+        public var title: String {
+            switch self {
+                case .allSeries: return "All series"
+                case .favorites: return "Favorites"
+                case .profile: return "Profile"
+            }
+        }
+
+        public var link: String {
+            switch self {
+                case .allSeries: return "all-series"
+                case .favorites: return "favorite-series"
+                case .profile: return "home"
+            }
+        }
+    }
+
+    public let isActive: Bool
     public let title: String
     public let link: String
-    public let isActive: Bool
 
-    public init(title: String,
-                link: String,
+    public init(description: Description,
                 isActive: Bool) {
-        self.title = title
-        self.link = link
         self.isActive = isActive
+
+        self.title = description.title
+        self.link = description.link
     }
 }
 

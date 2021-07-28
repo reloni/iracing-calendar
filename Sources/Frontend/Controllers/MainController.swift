@@ -16,42 +16,27 @@ struct MainController: RouteCollection {
         let context = HomeViewContext(
             title: "All series",
             user: req.session.user,
-            navbarItems: [
-                    .init(title: "Favorites", link: "favorite-series", isActive: false), 
-                    .init(title: "All series", link: "all-series", isActive: false),
-                    .init(title: "Profile", link: "home", isActive: false),
-                ]
+            navbarItems: navBarItems(req, activeItem: nil)
             )
+
         return req.view.render("home", context)
     }
 
     func allSeriesView(req: Request) throws -> EventLoopFuture<View> {
-        let navbarItems: [NavbarItem] = [
-            .init(title: "Favorites", link: "favorite-series", isActive: false),
-            .init(title: "All series", link: "all-series", isActive: true),
-            .init(title: "Profile", link: "home", isActive: false)
-        ]
-
-        
-
+        let navBarItems = navBarItems(req, activeItem: .allSeries)
         return req.client.get(ApiUri.currentSeason.url, headers: req.createHeaders([]))
             .filterHttpError()
             .flatMapThrowing { try $0.content.decode(RacingSeason.self) }
-            .map { SeriesViewContext.init(title: "All Series", user: req.session.user, series: $0.series, navbarItems: navbarItems) }
+            .map { SeriesViewContext(title: "All Series", user: req.session.user, series: $0.series, navbarItems: navBarItems) }
             .flatMap { req.view.render("all-series-view", $0) }
     }
 
     func favoriteSeriesView(req: Request) throws -> EventLoopFuture<Response> {
-        let navbarItems: [NavbarItem] = [
-            .init(title: "Favorites", link: "favorite-series", isActive: true),
-            .init(title: "All series", link: "all-series", isActive: false),
-            .init(title: "Profile", link: "home", isActive: false),
-        ]
-
+        let navBarItems = navBarItems(req, activeItem: .favorites)
         return req.client.get(ApiUri.favoriteSeries.url, headers: req.createHeaders([]))
             .filterHttpError()
             .flatMapThrowing { try $0.content.decode([RacingSerie].self) }
-            .map { SeriesViewContext.init(title: "Favorite series", user: req.session.user, series: $0, navbarItems: navbarItems) }
+            .map { SeriesViewContext.init(title: "Favorite series", user: req.session.user, series: $0, navbarItems: navBarItems) }
             .flatMap { req.view.render("favorite-series-view", $0) }
             .encodeResponse(for: req)
     }
