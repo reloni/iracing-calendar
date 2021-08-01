@@ -15,4 +15,11 @@ extension MainController {
         let user: SessionUser?
         let navbarItems: [NavbarItem]
     }
+
+    struct SerieDetailsContext: ViewContext {
+        let id: UUID
+        let title: String
+        let user: SessionUser?
+        let navbarItems: [NavbarItem]
+    }
 }

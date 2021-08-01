@@ -1,0 +1,8 @@
+#extend("navbar"):
+#export("body"):
+<!-- List -->
+<div class="container mt-4">
+  Serie details placeholder (#(id))
+</div>
+#endexport
+#endextend

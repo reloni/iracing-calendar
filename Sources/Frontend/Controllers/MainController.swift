@@ -8,7 +8,8 @@ struct MainController: RouteCollection {
         routes.get("home", use: homeView)
         routes.get("all-series", use: allSeriesView)
         routes.get("favorite-series", use: favoriteSeriesView)
-        routes.get("user-profile", use: homeView)
+        routes.get("user-profile", use: userProfileView)
+        routes.get("serie-details", use: serieDetailsView)
         routes.post("setFavoriteStatus", use: setFavoriteStatus)
     }
 
@@ -20,6 +21,28 @@ struct MainController: RouteCollection {
             )
 
         return req.view.render("home", context)
+    }
+
+    func userProfileView(req: Request) throws -> EventLoopFuture<View> {
+        let context = HomeViewContext(
+            title: "User Profile",
+            user: req.session.user,
+            navbarItems: navBarItems(req, activeItem: nil)
+            )
+
+        return req.view.render("user-profile", context)
+    }
+
+    func serieDetailsView(req: Request) throws -> EventLoopFuture<View> {
+        let uuid = try req.query.get(UUID.self, at: "id")
+        let context = SerieDetailsContext(
+            id: uuid,
+            title: "Serie Details",
+            user: req.session.user,
+            navbarItems: navBarItems(req, activeItem: nil)
+            )
+
+        return req.view.render("serie-details", context)
     }
 
     func allSeriesView(req: Request) throws -> EventLoopFuture<View> {

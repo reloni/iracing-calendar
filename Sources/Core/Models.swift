@@ -18,7 +18,7 @@ public struct NavbarItem: Codable {
             switch self {
                 case .allSeries: return "all-series"
                 case .favorites: return "favorite-series"
-                case .profile: return "home"
+                case .profile: return "user-profile"
             }
         }
     }
