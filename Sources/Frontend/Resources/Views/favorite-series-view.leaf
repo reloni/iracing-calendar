@@ -5,6 +5,7 @@
   <table class="table table-striped">
     <thead>
       <tr>
+        <th scope="col" style="width: 5%">Favorite</th>
         <th scope="col">Series</th>
         <th scope="col">Next Race</th>
         <th scope="col">Start Date</th>
@@ -16,6 +17,16 @@
     <tbody>
       #for(serie in series):
       <tr>
+        <td>
+          <input
+            class="form-check-input"
+            type="checkbox"
+            value=""
+            serieUuid="#(serie.id)"
+            onclick="toggleFavorite(event);"
+            #if(serie.isFavorite): checked #endif
+          />
+        </td>
         <td>#(serie.name)</td>
         <td>#(serie.nextRace)</td>
         <td>#(serie.startDate)</td>
@@ -27,5 +38,6 @@
     </tbody>
   </table>
 </div>
+<script type="text/javascript" src="/Scripts/toggleIsFavorite.js"></script>
 #endexport
 #endextend
