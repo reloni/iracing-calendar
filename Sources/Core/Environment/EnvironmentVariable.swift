@@ -30,7 +30,6 @@ extension Environment {
         case databaseUserName = "DATABASE_USERNAME"
         case databasePassword = "DATABASE_PASSWORD"
         case databaseName = "DATABASE_NAME"
-        case databaseSearchPath = "DATABASE_SEARCH_PATH"
 
         public var value: String? {
             Environment.get(rawValue)

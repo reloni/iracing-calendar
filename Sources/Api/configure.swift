@@ -1,6 +1,7 @@
 import Vapor
 import Fluent
-import FluentPostgresDriver
+import FluentMySQLDriver
+
 import Core
 
 // configures your application
@@ -9,15 +10,19 @@ public func configure(_ app: Application) throws {
 
     app.jwt.google.applicationIdentifier = Environment.api.cases.googleClientId.value
 
-    var config = PostgresConfiguration(
-        hostname: Environment.api.cases.databaseHost.value!,
-        port: Environment.api.cases.databasePort.value.flatMap(Int.init(_:))!,
-        username: Environment.api.cases.databaseUserName.value!,
-        password: Environment.api.cases.databasePassword.value!,
-        database: Environment.api.cases.databaseName.value!
-    )
-    config.searchPath = [Environment.api.cases.databaseSearchPath.value!]
-    app.databases.use(.postgres(configuration: config), as: .psql)
+    var tls = TLSConfiguration.makeClientConfiguration()
+    tls.certificateVerification = .none
+    let config = 
+        MySQLConfiguration(
+            hostname: Environment.api.cases.databaseHost.value!, 
+            port: Environment.api.cases.databasePort.value.flatMap(Int.init(_:))!, 
+            username: Environment.api.cases.databaseUserName.value!, 
+            password: Environment.api.cases.databasePassword.value!, 
+            database: Environment.api.cases.databaseName.value!, 
+            tlsConfiguration: tls
+        )
+
+    app.databases.use(.mysql(configuration: config), as: .mysql)
 
     app.migrations.add(
         Migration1()
