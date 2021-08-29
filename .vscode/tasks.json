@@ -14,9 +14,19 @@
             }
         },
         {
-            "label": "Run api",
+            "label": "Run api Dev",
             "type": "shell",
-            "command": "Scripts/run-api.sh",
+            "command": "Scripts/run-api-dev.sh",
+            "group": "build",
+            "problemMatcher": [],
+            "runOptions": {
+                "instanceLimit": 2
+            }
+        },
+        {
+            "label": "Run api Local",
+            "type": "shell",
+            "command": "Scripts/run-api-local.sh",
             "group": "build",
             "problemMatcher": [],
             "runOptions": {
