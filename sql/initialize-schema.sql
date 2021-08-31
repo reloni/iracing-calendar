@@ -1,3 +1,6 @@
+CREATE DATABASE iRacingCalendarDev
+WITH OWNER adminuser;
+
 CREATE SCHEMA calendar;
 
 CREATE ROLE apiuser 
