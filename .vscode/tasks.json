@@ -32,6 +32,16 @@
             "runOptions": {
                 "instanceLimit": 2
             }
+        },
+        {
+            "label": "Reset DB Content Local",
+            "type": "shell",
+            "command": "Scripts/reset-db-content.sh",
+            "group": "build",
+            "problemMatcher": [],
+            "runOptions": {
+                "instanceLimit": 2
+            }
         }
     ]
 }
