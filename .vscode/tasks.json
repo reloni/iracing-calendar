@@ -34,7 +34,7 @@
             }
         },
         {
-            "label": "Reset DB Content Local",
+            "label": "Reset DB Content",
             "type": "shell",
             "command": "Scripts/reset-db-content.sh",
             "group": "build",

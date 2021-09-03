@@ -1,19 +1,19 @@
-DROP DATABASE IF EXISTS iracingcalendardev WITH (FORCE);
-DROP ROLE IF EXISTS apiuser;
+DROP DATABASE IF EXISTS $DB WITH (FORCE);
+DROP ROLE IF EXISTS $USERNAME;
 
-CREATE DATABASE iracingcalendardev
+CREATE DATABASE $DB
 WITH OWNER adminuser;
 
- \connect iracingcalendardev;
+ \connect $DB;
 
 CREATE SCHEMA calendar;
 
-CREATE ROLE apiuser 
+CREATE ROLE $USERNAME
 LOGIN
-PASSWORD '123456';
+PASSWORD '$PASSWORD';
 
-GRANT ALL ON SCHEMA calendar TO apiuser;
+GRANT ALL ON SCHEMA calendar TO $USERNAME;
 
-ALTER USER apiuser SET search_path = calendar;
+ALTER USER $USERNAME SET search_path = calendar;
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp" SCHEMA calendar;
