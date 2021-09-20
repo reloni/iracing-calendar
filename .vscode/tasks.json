@@ -34,9 +34,19 @@
             }
         },
         {
-            "label": "Reset DB Content",
+            "label": "Reset DB Content (Dev)",
             "type": "shell",
             "command": "Scripts/reset-db-content.sh",
+            "group": "build",
+            "problemMatcher": [],
+            "runOptions": {
+                "instanceLimit": 2
+            }
+        },
+        {
+            "label": "Reset DB Content (Local)",
+            "type": "shell",
+            "command": "Scripts/reset-db-content-local.sh",
             "group": "build",
             "problemMatcher": [],
             "runOptions": {
