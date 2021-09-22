@@ -50,14 +50,7 @@ public struct GoogleAuthFrontendController: RouteCollection {
             request.session.user = SessionUser(user: user, token: token)
             
             let response = request.redirect(to: "/")
-            // response.cookies["token"] = 
-            //     HTTPCookies.Value(
-            //         string: token.access_token, 
-            //         maxAge: 60,
-            //         isSecure: false, 
-            //         isHTTPOnly: true, 
-            //         sameSite: .lax
-            //     )
+
             return request.eventLoop.future(response)
         }
     }

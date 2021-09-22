@@ -2,7 +2,7 @@ import Vapor
 
 extension Request {
     public var accessTokenHeader: (String, String)? {
-        (session.user?.token.access_token).map { ("Authorization", "Bearer \($0)") }
+        (session.user?.token.id_token).map { ("Authorization", "Bearer \($0)") }
     }
 
     public func createHeaders(_ headers: [(String, String)]) -> HTTPHeaders {
