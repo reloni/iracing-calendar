@@ -4,9 +4,9 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Run frontend",
+            "label": "Run frontend (Local)",
             "type": "shell",
-            "command": "Scripts/run-frontend.sh",
+            "command": "Scripts/run-frontend-local.sh",
             "group": "build",
             "problemMatcher": [],
             "runOptions": {
